@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Metrics see facts, never a language: they reference the engine and nothing else. -->
+  <ItemGroup>
+    <ProjectReference Include="../Navarone.Engine/Navarone.Engine.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,661 @@
+{
+  "granted": 87,
+  "problems": [
+    {
+      "id": "0000001",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Classifiers::Navarone.Classifiers.Deterministic.DeterministicProblemClassifier.FalsePositive(ProblemCase)",
+      "fingerprint": "78552c1b89ff79710ae3a11ec08f089471a23c966c71f3aa4690adfbcdaef342",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000002",
+      "check": "cyclomatic",
+      "symbol": "navarone::Navarone.Cli.Commands.RunAsync(string[], string, NavaroneEventHandler, Func\u003Cstring, NavaroneEventHandler, EngineSetup\u003E, TextWriter, TextWriter)",
+      "fingerprint": "017da622d6dde81e009c36f61506d9426cb0ca6a660af11a49bfefae14d5cc21",
+      "value": 39,
+      "resolution": {
+        "reason": "Commands is one static class that holds the whole CLI grammar, its wiring and every command\u0027s handler, so each dispatch arm tangles the form\u0027s words with whether it needs the repo and under what name it is costed. It shows in RunAsync and IdCommandAsync, where nearly every arm repeats costed(name, inRepo((setup, codebases) =\u003E XAsync(...))) and the inlined cost of 39 is every form of the CLI in one method pair; the split into IdCommandAsync only moved arms. The fix: parse the arguments into a command value that names its form, its cost and whether it needs the repo, run that value with the wiring once, and split Commands by cohesion into the id answers (a reason, keep, replace, large, settled with NoRule, DecisionOf and AnswerOf), the research commands (lens, evidence, duplicates with FloorOf, Share and Count) and brain\u0027s commands (disputes, events, code).",
+        "fingerprint": "017da622d6dde81e009c36f61506d9426cb0ca6a660af11a49bfefae14d5cc21",
+        "value": 39
+      }
+    },
+    {
+      "id": "0000003",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ControlFlowReader.ConstructOf(SyntaxNode)",
+      "fingerprint": "4f25bfd9b9e8acf1c8f4588145b66b3042e3bc661650be19b6680239302c14ac",
+      "value": 46,
+      "resolution": {
+        "reason": "ConstructOf maps every C# construct that breaks the straight line to its engine kind, its word and its head, one row per construct, and each row is now one line that names a kind and a head. Heads that take more than one step have their own named helper: HeadOf for an arm, a switch statement and a catch, and From for a keyword to a close paren. The new rows are the catch-all case and arm and the list pattern that tests its length. A not has no row because, like a !, it only flips a test another row counts. The property patterns and whens only tell apart constructs that share a Roslyn type. Cutting the map into helpers would give split-complexity the same whole back in pieces.",
+        "fingerprint": "4f25bfd9b9e8acf1c8f4588145b66b3042e3bc661650be19b6680239302c14ac",
+        "value": 44
+      }
+    },
+    {
+      "id": "0000004",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ControlFlowReader.Nests(SyntaxNode, SyntaxNode)",
+      "fingerprint": "997e1aacfe07c81cbf8c1b49768627d17f760105c4f6780b4e67af0088322db6",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000010",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.IsWrite(SyntaxNode)",
+      "fingerprint": "89871800e012fb26b3cfb8977ea563aaa6a8f9edc6be25c285d1b88ecd877102",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000011",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.IsWrite(ExpressionSyntax)",
+      "fingerprint": "bfe0d31b718beecbebec51a66fdca80223e2b98e711d5f89b6e302a175e42912",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000012",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.ConditionsOf(SyntaxNode, SemanticModel)",
+      "fingerprint": "751dee7bba55ebebfef74171ca74a09d88afbb4373a58fee36c61976c340236b",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000013",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.Steers(IdentifierNameSyntax, ExpressionSyntax, IParameterSymbol, (bool Guard, bool Switched), SemanticModel)",
+      "fingerprint": "eaecd1aa0bb295d8959ea5cdc1beaa3e711c570c17641518e45589c198639e07",
+      "value": 26,
+      "resolution": null
+    },
+    {
+      "id": "0000014",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.IsEmpty(ExpressionSyntax, SemanticModel)",
+      "fingerprint": "d747c7f781a2c231bb899177b5f3e565b6f836d38ca167dbc508b6284b998b0b",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000015",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Cognitive.CognitiveMetric.InCycle(IReadOnlyList\u003CMethodFacts\u003E)",
+      "fingerprint": "7e7bf976694eb4cf0180ee63acde135a7ea581e76cfe384e297d7eba8873a085",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000016",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Cognitive.CognitiveMetric.Increment(ControlFlowFact)",
+      "fingerprint": "bfb243e86fbb7af9aadd9efabb22952cd13c68b4ce624a1ff25b4fd50e759e9b",
+      "value": 17,
+      "resolution": {
+        "reason": "Increment is the table of what each control flow kind costs in cognitive complexity, one arm per group of kinds with the same cost. The ors only list the kinds in a group, and the two whens are Campbell\u0027s rules: an else if costs one flat where an if nests, and a continued run of one operator costs nothing where a new run costs one. Its comment now names the pattern test, which covers subpatterns, list lengths and list elements; the arms are unchanged from master. Cutting the table into helpers would spread one rule over methods that all read the same fact.",
+        "fingerprint": "bfb243e86fbb7af9aadd9efabb22952cd13c68b4ce624a1ff25b4fd50e759e9b",
+        "value": 17
+      }
+    },
+    {
+      "id": "0000017",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Cyclomatic.CyclomaticMetric.Rule(ControlFlowKind)",
+      "fingerprint": "c29d218676e7626ba28a2d436c60776629a5af606c1750fcf29c2a5d5d1aa386",
+      "value": 15,
+      "resolution": null
+    },
+    {
+      "id": "0000019",
+      "check": "cognitive",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.Steers(IdentifierNameSyntax, ExpressionSyntax, IParameterSymbol, (bool Guard, bool Switched), SemanticModel)",
+      "fingerprint": "eaecd1aa0bb295d8959ea5cdc1beaa3e711c570c17641518e45589c198639e07",
+      "value": 31,
+      "resolution": null
+    },
+    {
+      "id": "0000020",
+      "check": "cognitive",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Cognitive.CognitiveMetric.InCycle(IReadOnlyList\u003CMethodFacts\u003E)",
+      "fingerprint": "7e7bf976694eb4cf0180ee63acde135a7ea581e76cfe384e297d7eba8873a085",
+      "value": 33,
+      "resolution": null
+    },
+    {
+      "id": "0000021",
+      "check": "lcom4",
+      "symbol": "Navarone.Engine::Navarone.Engine.Lenses.Lens",
+      "fingerprint": "f9fef19133363485418792ee0ad4dce495ad29a0f67574b174745e68a9b2da83",
+      "value": 2,
+      "resolution": {
+        "reason": "Lens is a parsed lens and what running it shows on a Code; only its doc comments were rewrapped since the last answer. Parse is its static factory, which reads the text and checks Kind; ShowAsync and PageAsync run the lens on a Code by handing the whole record to MethodLens, so they use every field through this and none by name. lcom4 sees a factory and an execution that share no field, yet they are the two halves of one value, the text in and the page out, and a class for either would split one small language object in two.",
+        "fingerprint": "f9fef19133363485418792ee0ad4dce495ad29a0f67574b174745e68a9b2da83",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000022",
+      "check": "lcom4",
+      "symbol": "Navarone.Engine::Navarone.Engine.Reasons.ReasonsFile.ValueConverter\u003CT\u003E",
+      "fingerprint": "b85117994f3f264978c473a047eb33dadf2d6434ceb60c3ed8c0d1d499a2ab4d",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000024",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Duplication.CloneDetector.FindAsync(Code, CloneFloor, CancellationToken)",
+      "fingerprint": "3884ff8115e8ac066e2f7175c3e14a96ad143ad02369460b79b30ff8d99fc7d4",
+      "value": 36,
+      "resolution": {
+        "reason": "FindAsync reads the facts of the Code and hands them to Find, the clone detection algorithm in named steps as the Duplication README describes it: ShapesOf interns the token shapes, Longest seeds exact runs, Chains and Nearest join runs into near-miss chains under the floor\u0027s similarity, Overlaps and Largest drop chains over the same code, and PairOf, PieceOf and SameNames build the report. Each helper is one step of research code with a rule of its own, so one method of cyclomatic 36 would be harder to read, not simpler.",
+        "fingerprint": "3884ff8115e8ac066e2f7175c3e14a96ad143ad02369460b79b30ff8d99fc7d4",
+        "value": 36
+      }
+    },
+    {
+      "id": "0000025",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Duplication.ExactRuns.Of(int[][])",
+      "fingerprint": "92d42710fc464def77935b9ddd1d17012cbdd45e40f1ffcf7b2c6fad2f5f80e0",
+      "value": 29,
+      "resolution": null
+    },
+    {
+      "id": "0000026",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Lenses.MethodLens.Show()",
+      "fingerprint": "d43d1d0f6db0f0ad06a1f65d86a14188642637dfb7cb9df88af79dcc5fc45051",
+      "value": 25,
+      "resolution": {
+        "reason": "Show is the root of the lens\u0027s execution, and every helper is one view or one rule of how the page shows code, each told the section it writes into. Show(LensView, MethodFacts, LensSection) dispatches a view by its word; Callers shows each call site with its excerpt, and Calling puts the caller\u0027s own lens first on the calling line; Expand shows what the method calls, breadth first through Expanded; Class shows the declaring type\u0027s outline and the fields it uses; Calls marks each line that calls a method a lens can name; Once shows a method\u0027s or type\u0027s code the first time and points back afterwards. Inlined, three views and their recursion would be one method with three nested loops.",
+        "fingerprint": "d43d1d0f6db0f0ad06a1f65d86a14188642637dfb7cb9df88af79dcc5fc45051",
+        "value": 25
+      }
+    },
+    {
+      "id": "0000027",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Lenses.MethodLensRules.Check(Lens)",
+      "fingerprint": "2668142a3ced7a24713a5e3b4bcada4a73d68b66a26d0c6682f98d6fa1975039",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000028",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ControlFlowReader.Read(SyntaxNode)",
+      "fingerprint": "0dd1cbbace3ea993d1ca324ecbdbb30346a9dd2583ac6a253b2f2d3c36e2b383",
+      "value": 19,
+      "resolution": {
+        "reason": "Read turns the constructs of each node into facts. Before the loop over a node\u0027s constructs it prepares, as named steps, the node\u0027s nesting depth, whether the node continues a run, and the fact it is a part of; inside the loop it names each head before it builds the fact, and it chains a second construct on the same node, such as the or of a list element, as a part of the first. Each helper answers one question with its own walk up the parents: PartOf finds the nearest construct around the node and stops at a statement, NestingDepth counts the levels that nest around it, and Continues decides whether an else if, an and or an or continues the run it sits in. Inlining them would mix three separate walks into one loop body.",
+        "fingerprint": "0dd1cbbace3ea993d1ca324ecbdbb30346a9dd2583ac6a253b2f2d3c36e2b383",
+        "value": 19
+      }
+    },
+    {
+      "id": "0000029",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FactExtractor.ExtractAsync(Solution, Ignores, CancellationToken)",
+      "fingerprint": "b0161da939afedba9b3b4760156a3dd550a3a7370cd472cbebe6ae11f236eae8",
+      "value": 44,
+      "resolution": {
+        "reason": "FactExtractor is one static class that walks the solution, builds types and fields, maps every member kind onto its methods and reads names, locations and contracts, so ExtractAsync is the root of every helper in the file and its inlined cyclomatic of 44 is the whole provider walk. It shows in ExtractAsync, Read, TypeOf, FieldsOf, FieldOf, MethodsOf, BodilessOf, PrimaryConstructorOf and IsTestAttribute. The fix is slice 12 of the review: split FactExtractor into files by cohesion, the solution walk, the type and field builder, the member reader and the test-class rule, so each is its own type and none is a helper of the walk.",
+        "fingerprint": "b0161da939afedba9b3b4760156a3dd550a3a7370cd472cbebe6ae11f236eae8",
+        "value": 44
+      }
+    },
+    {
+      "id": "0000030",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.Of(SyntaxNode, SemanticModel)",
+      "fingerprint": "8580fa34bf97593aaf8ea73aa7e0a3c3cf9f8828ca059c573b10fb3acdba0d2d",
+      "value": 11,
+      "resolution": {
+        "reason": "FlatDispatch.Of decides whether a body is a flat dispatch and whether it is a mapping, and its helpers are the grammar of that decision, one per shape C# writes. Is picks the block or the arrow body. IsDispatch picks a switch, a return, an if chain or a run of ifs. IsExpressionDispatch reads a switch expression or a conditional chain, and IsConditionalChain walks the ternary chain. IsChain walks an else if chain. IsFlatSection and IsFlatLabel read one switch section and its labels. IsLeaf tells a single return, throw or expression. IsTest decides that a condition is one test, now also refusing a list pattern that tests through the pattern tests the reader gives it, and IsCases accepts a label list of constants and types. IsMapping and IsAction decide that no branch acts. Several call themselves, so they cannot be inlined, and inlining the rest would read every shape in one method.",
+        "fingerprint": "5ed2cc1c21d8a41c85bb7f17fe19d98355bca5b3ab31d00a865f06b8f7a1230f",
+        "value": 61
+      }
+    },
+    {
+      "id": "0000031",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering.Of(IReadOnlyList\u003CSyntaxNode\u003E, IReadOnlyList\u003CIParameterSymbol\u003E, SemanticModel)",
+      "fingerprint": "df84859ce4323dbcbfe95097320e99086032eaada9f99d6fe2e4b64f5dc5eb77",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000032",
+      "check": "split-complexity",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Lcom4.Lcom4Metric.Measure(CodebaseFacts, CheckLimits)",
+      "fingerprint": "a84965fc0c8a2aef6f478c4e161a928f65217b8eb2cd92a35b9c5598036cb1b8",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000033",
+      "check": "split-complexity",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.SplitComplexity.SplitComplexityMetric.Measure(CodebaseFacts, CheckLimits)",
+      "fingerprint": "9cf229c1a4cbd2f84ac1a596b54079bae8cfa4368b3490f150a3e1aaab4773d1",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000034",
+      "check": "control-coupling",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Cyclomatic.CyclomaticMetric.Rule(ControlFlowKind)",
+      "fingerprint": "c29d218676e7626ba28a2d436c60776629a5af606c1750fcf29c2a5d5d1aa386",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000035",
+      "check": "lcom4",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FactExtractor",
+      "fingerprint": "e55bb1bb651afabea6df194aed05fbf5ef82c544a8d8f4935c24c38b3aaa85a3",
+      "value": 5,
+      "resolution": null
+    },
+    {
+      "id": "0000036",
+      "check": "lcom4",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch",
+      "fingerprint": "47281c23cfd947b1dab3a41f19ae1a1227685cc7c1b81afff9c1b3e2d770f470",
+      "value": 4,
+      "resolution": null
+    },
+    {
+      "id": "0000037",
+      "check": "lcom4",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ParameterSteering",
+      "fingerprint": "6a1f77ee482a972be0231a36e126bffa442e3f61523dc1f4d0f01bb2b98a3d11",
+      "value": 3,
+      "resolution": null
+    },
+    {
+      "id": "0000038",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.IsDispatch(List\u003CStatementSyntax\u003E)",
+      "fingerprint": "d32b7e953e77a933a2925f0b09080537125b39f6c027f3b523651262522f2294",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000039",
+      "check": "split-complexity",
+      "symbol": "Navarone.Classifiers::Navarone.Classifiers.Deterministic.DeterministicProblemClassifier.FalsePositive(ProblemCase)",
+      "fingerprint": "cd9027e4add55557674d1f572daf88107bdda9ce7c6dc7dac0fa74edac33d760",
+      "value": 18,
+      "resolution": {
+        "reason": "IsValueClass is a real split: recognising a value class (every non-constructor method is a control-flow-free, call-free accessor over at most one own field) is its own question, beside FalsePositive choosing which rule applies to the finding. FalsePositive itself is flat guards at 10 paths, and the 8 decisions of IsValueClass are one loop over a type\u0027s methods with a guard per way a method can be more than data.",
+        "fingerprint": "cd9027e4add55557674d1f572daf88107bdda9ce7c6dc7dac0fa74edac33d760",
+        "value": 18
+      }
+    },
+    {
+      "id": "0000042",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Analysis.RunAsync(EngineSetup, IReadOnlyList\u003Cstring\u003E, Coverage, CancellationToken)",
+      "fingerprint": "c510b0d97d224ba0671ce1cdba34f53becf1cb1e0ec2d5d0ccfbbf8dae24a459",
+      "value": 11,
+      "resolution": {
+        "reason": "RunAsync loads the code once, collects the user\u0027s clash judgements through WorktreeClashes, builds one Checked and saves it, then derives three separate things the run made happen. Fixes finds the open problems whose finding is gone and whose subject\u0027s code changed, reading the subject through Checked.SubjectOf; RaisedAgain finds the shown red problems not open on this worktree; Entry turns a shown problem into the run\u0027s entry with its red code stored. Each helper is its own rule over the worktree\u0027s history, and inlining them would mix three rules in one loop body.",
+        "fingerprint": "c510b0d97d224ba0671ce1cdba34f53becf1cb1e0ec2d5d0ccfbbf8dae24a459",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000044",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Events.WorktreeHistory.Add(LoggedEvent)",
+      "fingerprint": "3b1d051521f70d65cdc3ee73496b7e00638c26d6e7733b7b3a0d1c54b7cded69",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000045",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Events.WorktreeHistory.OfEach(IReadOnlyList\u003CLoggedEvent\u003E)",
+      "fingerprint": "18448bec06c08cd496ac10ac22988ee16540a378315e209ad08474d4a455320c",
+      "value": 18,
+      "resolution": {
+        "reason": "OfEach replays the log once into one history per worktree, and the split is one reader per kind of event, not one job cut to pass. Add is the dispatch over the event kinds, one arm per event type the log holds. Show is the rule for one problem a run showed: a waiting clash only takes its code, a red one opens, a green one closes unless a refusal or replace reopened it. Answer is the rule for a reason against a standing refusal, a clash when it defends the code refused, and Stand keeps a refusal that names its rule. Inlined, each rule would sit inside the dispatch inside the replay loop.",
+        "fingerprint": "18448bec06c08cd496ac10ac22988ee16540a378315e209ad08474d4a455320c",
+        "value": 18
+      }
+    },
+    {
+      "id": "0000046",
+      "check": "lcom4",
+      "symbol": "Navarone.Engine::Navarone.Engine.Events.Clash",
+      "fingerprint": "d3fd1dd065ea6c9ce02b7c603afc4413e562046c50e70bdfcd7215fe63d2da3f",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000047",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Clashes.Questions.Document(NavaroneEventHandler)",
+      "fingerprint": "c8eeee8c3d1092a34a445b43a9020ed62e106afc6dcff24780ee00b4d8dbdb4b",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000048",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Clashes.TasteRules.Load(string)",
+      "fingerprint": "92d8bfa322263197bb0bc32a40ee3316b6ccf029930c1353002c1a8ca43d7a77",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000051",
+      "check": "control-coupling",
+      "symbol": "Navarone.Engine::Navarone.Engine.Analysis.SettleAsync(EngineSetup, IReadOnlyList\u003Cstring\u003E, ProblemId, Position, string, CancellationToken)",
+      "fingerprint": "283b90be30eb379b78781b1654c63fbc55e2d1c1e92c5ffe6d0baedaa11b6062",
+      "value": 1,
+      "resolution": {
+        "reason": "The user\u0027s position is the decision the settled event records, not a mode that picks the method\u0027s behaviour: keep and replace both end in the same logged settled. Only a keep goes on to AddWords, because his words join the agent\u0027s text in the resolution once the event is written. The one branch on the position is that rule.",
+        "fingerprint": "283b90be30eb379b78781b1654c63fbc55e2d1c1e92c5ffe6d0baedaa11b6062",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000052",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Analysis.SettleAsync(EngineSetup, IReadOnlyList\u003Cstring\u003E, ProblemId, Position, string, CancellationToken)",
+      "fingerprint": "ba92855441155b0858d3376d9f9a910a4da0dc52da6f15837f796c709e90ef47",
+      "value": 11,
+      "resolution": {
+        "reason": "SettleAsync goes guard, resolve, return: it finds the problem\u0027s last large change in this repo, refuses a clash, checks the repo once, stores the subject\u0027s code and writes the settled. AddWords is the one rule a keep adds afterwards, joining the user\u0027s words to the agent\u0027s text in the resolution, with its two guards for no words and no finding now. Only its parameter type changed in this slice, from the nested Checked to CheckedRepo; inlined, that rule would put two guards inside a method that otherwise only reads and records.",
+        "fingerprint": "ba92855441155b0858d3376d9f9a910a4da0dc52da6f15837f796c709e90ef47",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000053",
+      "check": "cognitive",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.ControlFlowReader.ConstructOf(SyntaxNode)",
+      "fingerprint": "4f25bfd9b9e8acf1c8f4588145b66b3042e3bc661650be19b6680239302c14ac",
+      "value": 18,
+      "resolution": {
+        "reason": "ConstructOf costs one for its switch. Every other point costs one flat: a subpattern, when or or that tells apart two constructs of one Roslyn type, such as a catch-all case from a case that tests, an else if from an if, or a list that tests its length from a lone slice. No row nests, and the heads that need steps now sit in named HeadOf helpers, so each row reads as one line that names its construct. The cost counts the constructs C# has, not tangled logic.",
+        "fingerprint": "4f25bfd9b9e8acf1c8f4588145b66b3042e3bc661650be19b6680239302c14ac",
+        "value": 16
+      }
+    },
+    {
+      "id": "0000054",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.IsDispatch(List\u003CStatementSyntax\u003E)",
+      "fingerprint": "e3eb8cce975190cdbf3db1d059db4e5e762c1a74008a9ee23f4b82810e368b7f",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000055",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.IsFlatSection(SwitchSectionSyntax)",
+      "fingerprint": "ca870cba15363fe81ff20c9bdb3bb759c9cd478aa6760cc08a3e7100c1ab84f4",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000056",
+      "check": "cognitive",
+      "symbol": "navarone::Navarone.Cli.Commands.RunAsync(string[], string, NavaroneEventHandler, Func\u003Cstring, NavaroneEventHandler, EngineSetup\u003E, TextWriter, TextWriter)",
+      "fingerprint": "017da622d6dde81e009c36f61506d9426cb0ca6a660af11a49bfefae14d5cc21",
+      "value": 31,
+      "resolution": {
+        "reason": "Commands is one static class that holds the whole CLI grammar, its wiring and every command\u0027s handler, so each dispatch arm tangles the form\u0027s words with whether it needs the repo and under what name it is costed. It shows in RunAsync and IdCommandAsync, where nearly every arm repeats costed(name, inRepo((setup, codebases) =\u003E XAsync(...))) and the inlined cost of 39 is every form of the CLI in one method pair; the split into IdCommandAsync only moved arms. The fix: parse the arguments into a command value that names its form, its cost and whether it needs the repo, run that value with the wiring once, and split Commands by cohesion into the id answers (a reason, keep, replace, large, settled with NoRule, DecisionOf and AnswerOf), the research commands (lens, evidence, duplicates with FloorOf, Share and Count) and brain\u0027s commands (disputes, events, code).",
+        "fingerprint": "017da622d6dde81e009c36f61506d9426cb0ca6a660af11a49bfefae14d5cc21",
+        "value": 31
+      }
+    },
+    {
+      "id": "0000057",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Events.NavaroneEventHandler.WriteOrThrow(EventPlace, IReadOnlyList\u003CINavaroneEvent\u003E)",
+      "fingerprint": "9c219d65091bd6ed8678c6fd27dabbf13790cb8b2f0a3aa342e185afdded98c1",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000059",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FlatDispatch.IsTest(SyntaxNode)",
+      "fingerprint": "3ab83cec088ebea6a69dce0952dd788f0f50b00d760765c4abf44191433bac68",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000061",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.Events.NavaroneEventHandler.ReadLines()",
+      "fingerprint": "f1fbcd7a5ae10191c13d37196e952cbdd92a6cedaa19d51ae95d3c34a9fb92b7",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000064",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.SymbolUses.UsedBy(IOperation, SemanticModel)",
+      "fingerprint": "c9621ba761a1d2980db3540a2b27e251f37da6c268a3fc362c780822dd029b7f",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000068",
+      "check": "cyclomatic",
+      "symbol": "navarone::Navarone.Cli.Grammar.Parse(string[])",
+      "fingerprint": "d64d4b1460431b44dd250092bd9155d109181f87efb5b7b36036f8ae1bf85998",
+      "value": 38,
+      "resolution": {
+        "reason": "Parse is the grammar of navarone and nothing else: each arm is one form of the usage text, written as its words in a list pattern, and returns the command value that form names. The paths are those words, each constant a list element tests, not logic. The cost, the repo wiring and the handlers moved out to Command, the runner in Commands and the command classes, as Kelk decided. Cutting the arms further, by first word, would scatter one grammar over several methods and split-complexity would count them back.",
+        "fingerprint": "d64d4b1460431b44dd250092bd9155d109181f87efb5b7b36036f8ae1bf85998",
+        "value": 38
+      }
+    },
+    {
+      "id": "0000069",
+      "check": "cyclomatic",
+      "symbol": "navarone::Navarone.Cli.Grammar.IdForm(ProblemId, string[])",
+      "fingerprint": "64d22fd8755f95664ce0a8e3d6226ba0b0413651eab905e3baeb3ec9fdd6b7bc",
+      "value": 30,
+      "resolution": {
+        "reason": "IdForm is the grammar of the forms that open with a problem id, read after Parse checked the id\u0027s shape at the boundary. Each arm is one form of the usage text: keep, replace with and without its rule, large, settled with and without words, and a reason, and returns the command value it names. The paths are the words those forms test, not logic. The arm for replace, large or settled alone stays so a reserved word on its own is the usage and never a reason.",
+        "fingerprint": "64d22fd8755f95664ce0a8e3d6226ba0b0413651eab905e3baeb3ec9fdd6b7bc",
+        "value": 30
+      }
+    },
+    {
+      "id": "0000070",
+      "check": "cognitive",
+      "symbol": "navarone::Navarone.Cli.Grammar.Parse(string[])",
+      "fingerprint": "d64d4b1460431b44dd250092bd9155d109181f87efb5b7b36036f8ae1bf85998",
+      "value": 27,
+      "resolution": {
+        "reason": "Parse is hard to read only in the count: it is one flat switch, one arm per form of the usage text, each arm the form\u0027s words in a list pattern and the command value it names. Nothing nests and no arm does a second thing; the cost, the repo wiring and the handlers live in Command, Commands and the command classes. The id-shape guards are the boundary check Kelk kept in the parser.",
+        "fingerprint": "d64d4b1460431b44dd250092bd9155d109181f87efb5b7b36036f8ae1bf85998",
+        "value": 27
+      }
+    },
+    {
+      "id": "0000071",
+      "check": "cognitive",
+      "symbol": "navarone::Navarone.Cli.Grammar.IdForm(ProblemId, string[])",
+      "fingerprint": "64d22fd8755f95664ce0a8e3d6226ba0b0413651eab905e3baeb3ec9fdd6b7bc",
+      "value": 21,
+      "resolution": {
+        "reason": "IdForm reads as the id half of the usage text: one flat switch, one arm per form that opens with a problem id, each arm its words in a list pattern and the command value it names. Nothing nests and no arm does a second thing. Its order is the grammar\u0027s: a reserved word alone is the usage before the last arm reads one word as a reason.",
+        "fingerprint": "64d22fd8755f95664ce0a8e3d6226ba0b0413651eab905e3baeb3ec9fdd6b7bc",
+        "value": 21
+      }
+    },
+    {
+      "id": "0000072",
+      "check": "lcom4",
+      "symbol": "navarone::Navarone.Cli.Commands",
+      "fingerprint": "b8a1ee50632b9062790c62c0fc92fa7e974eff0e082422fe3c196e2f50e42614",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000074",
+      "check": "split-complexity",
+      "symbol": "navarone::Navarone.Cli.ResearchCommands.Duplicates(string[])",
+      "fingerprint": "9c4c0f49b6609bfd9b391313bcdde2dd58a981c7af2c58a406463b805e44d5e7",
+      "value": 15,
+      "resolution": {
+        "reason": "Duplicates declares the command, and DuplicatesAsync adds 1 decision, refusing a floor it cannot read before it finds the pairs in the repo\u0027s code. FloorOf adds 8, the option grammar of duplicates: an odd count, a name given twice, --similarity and --tokens each present with a readable value, and an unknown name left over. Share adds 3, a number that parses and lies above 0 and at most 1, and Count adds 2, a whole number that parses and is 1 or more. Each helper is one named rule of an option\u0027s value with plain if guards, so inlining them would make one harder method.",
+        "fingerprint": "9c4c0f49b6609bfd9b391313bcdde2dd58a981c7af2c58a406463b805e44d5e7",
+        "value": 15
+      }
+    },
+    {
+      "id": "0000075",
+      "check": "control-coupling",
+      "symbol": "navarone::Navarone.Cli.IdAnswers.DecisionOf(string)",
+      "fingerprint": "252dae87513f1d0319600c0fc31fd949708eebb0f24506bb50e5659c7d896217",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000076",
+      "check": "control-coupling",
+      "symbol": "navarone::Navarone.Cli.IdAnswers.AnswerOf(Position)",
+      "fingerprint": "e49b20ef79a54f34d93e445e368a7a111faffdcefe11de514f4b11b98dea5b3e",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000077",
+      "check": "lcom4",
+      "symbol": "Navarone.Engine::Navarone.Engine.CheckedRepo",
+      "fingerprint": "24bc9d71cdc559e1a7ca1f2a4ecacdc78abcc1d26940b004b14d8afad6982b82",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000078",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FactExtractor.ExtractAsync(Solution, Ignores, CancellationToken)",
+      "fingerprint": "dd19179a6583f76c1180bc0f83842762a6f1cc9ff1d5ac2aa2c51369418320e7",
+      "value": 12,
+      "resolution": {
+        "reason": "ExtractAsync is the walk\u0027s list of what it reads, one plain guard per rule: a project that is not C#, an ignored project, a project with no compilation, an ignored file, a document with no tree, a generated file under obj, and a file another project compiled already. The two loops, projects then documents, are the solution\u0027s own shape, and each guard is a continue as rule 4 asks. The reading is handed to Read and the builders, and whether the facts are complete is one named step after the walk, MissesReferences over the compilations it read, which adds no path.",
+        "fingerprint": "dd19179a6583f76c1180bc0f83842762a6f1cc9ff1d5ac2aa2c51369418320e7",
+        "value": 12
+      }
+    },
+    {
+      "id": "0000079",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.InitializerReader.InitializersOf(MemberDeclarationSyntax, SemanticModel, string, CancellationToken)",
+      "fingerprint": "4b92d6d056962888ef2b135e346e746d83cdaaad02501c788b5648b24069a33f",
+      "value": 11,
+      "resolution": {
+        "reason": "InitializersOf reads the two members whose initializer can hold logic, a property with an initializer and each variable of a field or field-like event declaration, and both cases now read in one form: a plain guard for logic in the value, then one for the member\u0027s symbol, then the add. Its eleven paths are the two member kinds and those guards, the variable\u0027s value guard included. A helper per kind would only add a split summing the same paths.",
+        "fingerprint": "4b92d6d056962888ef2b135e346e746d83cdaaad02501c788b5648b24069a33f",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000080",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.MethodReader.AccessorsOf(BasePropertyDeclarationSyntax, SemanticModel, string, CancellationToken)",
+      "fingerprint": "e9e33a7be46a0363ccaea79ce803d4712e74e9df0b55ad3fe93f051f4a238717",
+      "value": 12,
+      "resolution": {
+        "reason": "AccessorsOf reads a property\u0027s methods in its two forms: an expression-bodied property or indexer has one getter, its expression, and a property, indexer or event with an accessor list has each accessor that has a body and a symbol. The switch names which declarations carry an expression body, and each other path is a plain guard. The two forms are one question, which methods this property declares, and the caller MethodsOf only asks it.",
+        "fingerprint": "e9e33a7be46a0363ccaea79ce803d4712e74e9df0b55ad3fe93f051f4a238717",
+        "value": 12
+      }
+    },
+    {
+      "id": "0000081",
+      "check": "cognitive",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.FactExtractor.ExtractAsync(Solution, Ignores, CancellationToken)",
+      "fingerprint": "dd19179a6583f76c1180bc0f83842762a6f1cc9ff1d5ac2aa2c51369418320e7",
+      "value": 22,
+      "resolution": {
+        "reason": "The cognitive weight of ExtractAsync is its seven guards nested inside the two loops of the walk, projects then documents, each a plain continue for one rule of what is read: not C#, an ignored project, no compilation, an ignored file, no tree, generated under obj, read already. Moving the document loop into a helper would only hide the nesting from the count while the reader still holds both loops. The completeness of the facts is decided after the walk in one line over the compilations it kept, so it adds no nesting.",
+        "fingerprint": "dd19179a6583f76c1180bc0f83842762a6f1cc9ff1d5ac2aa2c51369418320e7",
+        "value": 22
+      }
+    },
+    {
+      "id": "0000082",
+      "check": "cognitive",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.InitializerReader.InitializersOf(MemberDeclarationSyntax, SemanticModel, string, CancellationToken)",
+      "fingerprint": "0db28a6fee6d2b4452fdb4629d4c19832101e55c2f8102ea5b8882e935fbcb7a",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000083",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.MethodReader.Of(IMethodSymbol, SyntaxNode, IReadOnlyList\u003CSyntaxNode\u003E, string, Written, SemanticModel, string)",
+      "fingerprint": "5ed5d083ee230af2dd8d8c6c9dc4a78587bea6ccf3991094603fd7c341ff6dc6",
+      "value": 11,
+      "resolution": {
+        "reason": "MethodReader.Of maps one method onto its facts in named steps, and each helper answers one fact. ContractsOf walks the overridden chain and adds each interface whose members\u0027 implementations include the method, IdsOf adds an accessor\u0027s property ids to the declaration\u0027s own, and NameOf names a property accessor as get or set and any other method with its parameter types. Inlined, three loops and two branches would sit in the preparation of one constructor call; each is its own rule over the symbol.",
+        "fingerprint": "5ed5d083ee230af2dd8d8c6c9dc4a78587bea6ccf3991094603fd7c341ff6dc6",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000084",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.TypeBuilder.Of(INamedTypeSymbol, string, Ignores)",
+      "fingerprint": "dec44f7db25d65dc00564baa633ccdca2ec32985318fc1f28261546d8c76cd8f",
+      "value": 14,
+      "resolution": {
+        "reason": "TypeBuilder.Of starts a builder from the type\u0027s name, outer type, kind, test rule and fields, each a named step. FieldsOf gathers the symbols that stand as fields, every non-constant field or its auto-property and each captured primary constructor parameter, and FieldOf turns one into facts, skipping a symbol with no declaration or one declared in an ignored file. Inlined, the symbol walk and the per-field guards would bury the builder\u0027s start under the field rule, which is a job of its own.",
+        "fingerprint": "dec44f7db25d65dc00564baa633ccdca2ec32985318fc1f28261546d8c76cd8f",
+        "value": 14
+      }
+    },
+    {
+      "id": "0000085",
+      "check": "split-complexity",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.TestClass.Is(INamedTypeSymbol)",
+      "fingerprint": "fa46ceae31bd1a1d7627301f6ec217a32da3106b93dd0d96dd8b9d7c86e2e92e",
+      "value": 13,
+      "resolution": {
+        "reason": "TestClass.Is says whether any method of the type carries a test attribute, and IsTestAttribute says whether one attribute is a test attribute: it walks up the attribute\u0027s base types, so an attribute derived from Fact counts, and names the four frameworks\u0027 attributes with and without the suffix, eight names in one or-pattern. Inlined, the base-chain loop would nest in the two loops over methods and attributes, three levels deep for one rule.",
+        "fingerprint": "fa46ceae31bd1a1d7627301f6ec217a32da3106b93dd0d96dd8b9d7c86e2e92e",
+        "value": 13
+      }
+    },
+    {
+      "id": "0000086",
+      "check": "cyclomatic",
+      "symbol": "Navarone.Metrics::Navarone.Metrics.Lcom4.Lcom4Metric.PiecesOf(TypeFacts)",
+      "fingerprint": "e68801f00dbaf68efd5e67c69f006b23de91702c0c19ec031336d4e2d4eb0abb",
+      "value": 13,
+      "resolution": {
+        "reason": "PiecesOf is Hitz and Montazeri\u0027s union-find in one place, told in named steps: it picks the methods that say something, each that uses an instance field, calls another method of the class or is called by one, then joins two methods for each call and each shared field, finds every method\u0027s root and groups the methods by root into pieces with their fields. The thirteen paths are the loops of those steps and the local Find and Join; scattering them into helpers would cut one algorithm into pieces that only it uses.",
+        "fingerprint": "e68801f00dbaf68efd5e67c69f006b23de91702c0c19ec031336d4e2d4eb0abb",
+        "value": 13
+      }
+    },
+    {
+      "id": "0000087",
+      "check": "lcom4",
+      "symbol": "Navarone.Engine::Navarone.Engine.Cache.FactsJson.ControlFlowConverter",
+      "fingerprint": "d1a1cd153235b1065376897768a982a4a3303040c11079ac91d7878424bc8841",
+      "value": 2,
+      "resolution": {
+        "reason": "A JsonConverter is the pair of inverse functions of one format: Read turns the entries back into facts and Write turns facts into entries, and the two share the shape of ControlFlowEntry and the rule that a whole is written as its place in the list, not as a field. Splitting them into a reader class and a writer class would part the two halves of one format, which must change together, so one converter is the right unit.",
+        "fingerprint": "d1a1cd153235b1065376897768a982a4a3303040c11079ac91d7878424bc8841",
+        "value": 2
+      }
+    }
+  ]
+}

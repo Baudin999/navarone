@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The CLI wires a provider, the checks and the classifiers into the engine. It holds no analysis. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>navarone</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Navarone.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Navarone.Engine/Navarone.Engine.csproj" />
+    <ProjectReference Include="../Navarone.Metrics/Navarone.Metrics.csproj" />
+    <ProjectReference Include="../Navarone.Classifiers/Navarone.Classifiers.csproj" />
+    <ProjectReference Include="../Navarone.Languages.CSharp/Navarone.Languages.CSharp.csproj" />
+  </ItemGroup>
+</Project>

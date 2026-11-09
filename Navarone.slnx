@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Navarone.Engine/Navarone.Engine.csproj" />
+    <Project Path="src/Navarone.Metrics/Navarone.Metrics.csproj" />
+    <Project Path="src/Navarone.Classifiers/Navarone.Classifiers.csproj" />
+    <Project Path="src/Navarone.Languages.CSharp/Navarone.Languages.CSharp.csproj" />
+    <Project Path="src/Navarone.Cli/Navarone.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Navarone.Tests/Navarone.Tests.csproj" />
+  </Folder>
+</Solution>

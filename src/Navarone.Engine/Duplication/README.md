@@ -1,0 +1,15 @@
+# Duplication
+
+The clone detector behind `navarone duplicates`. It is research toward a duplication check, not an `ISignal`: it raises no finding, asks no question and records no resolution. What it found and why it works this way is research the repo's history holds, under `docs/research/duplication/` before it was removed.
+
+It reads the `Tokens` of every method, each token's shape as the provider normalised it, so it never sees a language. A renamed copy has the shape of its original, because every identifier is `id` and every literal `lit`.
+
+- `ExactRuns`: every maximal run of at least 10 equal shapes shared by two methods, or by two places in one method. Each run of 10 shapes is hashed, and two places with the same hash seed a run that grows token by token as long as the shapes stay equal, so a hash collision never makes a run. A seed written in more than 100 places, such as boilerplate or a block copied into many methods, pairs each place with the next one in order instead of every two, since every two would cost the square of their count: every copy still joins a pair.
+- `CloneChain`: runs that follow each other on both sides, joined into one near-miss match. Between two runs lie the tokens a copy added, removed or changed, and the tokens the gap's two sides still share, in order, count as matched. A run joins only while the match keeps the floor's similarity. Once no run joins, the match grows past each end by the tokens the sides still share there, too few in a row to seed a run, where the shared tokens outweigh those left unmatched, such as a line added before the last statement.
+- `TokenAlignment`: the longest common subsequence of every two prefixes of two stretches of shapes, read forwards or backwards, which the gaps and the ends are aligned with.
+- `CloneDetector`: per two methods, starts a match at each run no match holds yet, joins the nearest following run while it can, grows the ends, and keeps the matches at or above the floor. Of matches that overlap on both sides only the largest is kept, since a repeated shape matches itself shifted many times over. Two places in one method never overlap. It returns the pairs, the most similar first.
+- `ClonePair`: two pieces and how they match. Similarity is the share of the longer piece's tokens the other matches in order, Tokens the longer piece's size, and SameNames the share of the matched identifiers spelled the same on both sides. SameNames filters nothing.
+- `CloneFloor`: the similarity and size under which a match is not reported; the research floor is 0.7 and 30 tokens. The floor only drops matches that are not duplication: when in doubt, a pair is reported.
+- `CloneReport`: writes the pairs as markdown, both pieces with their code as whole lines, a line holding a token the other piece does not match marked `~`, a token outside the match on the piece's first or last line included.
+
+A match can lie anywhere in a method, so a block copied into a larger method is found as well as a whole copied method. A semantic clone, the same behaviour written differently, is out of scope.

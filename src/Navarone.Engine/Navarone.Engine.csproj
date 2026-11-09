@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The engine references no other Navarone project and no parser. It knows no language. -->
+</Project>

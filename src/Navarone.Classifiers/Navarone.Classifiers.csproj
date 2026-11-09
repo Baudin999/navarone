@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Classifiers see findings, facts and reasons, never a language: they reference the engine and nothing else. -->
+  <ItemGroup>
+    <ProjectReference Include="../Navarone.Engine/Navarone.Engine.csproj" />
+  </ItemGroup>
+</Project>
