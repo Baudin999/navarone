@@ -121,13 +121,26 @@ public sealed class MapTests : IDisposable
         Assert.Equal("T.First", (string?)map["files"]![0]!["methods"]![0]!["name"]);
     }
 
-    private async Task ShopAsync()
+    [Fact]
+    public async Task ASolutionInASubdirectoryGivesFilesAndProblemsPathsRelativeToTheRepo()
+    {
+        await ShopAsync("sub");
+
+        await RunAsync("map", "--json");
+
+        var map = JsonNode.Parse(output.ToString())!;
+        Assert.Equal("sub/Shop.cs", (string?)Assert.Single(map["files"]!.AsArray())!["path"]);
+        Assert.All(map["problems"]!.AsArray(), problem => Assert.Equal("sub/Shop.cs", (string?)problem!["path"]));
+    }
+
+    private async Task ShopAsync(string directory = "")
     {
         repo.Git("init", "-q", "-b", "master");
-        var solution = Path.Combine(repo.Root, "a.sln");
+        Directory.CreateDirectory(Path.Combine(repo.Root, directory));
+        var solution = Path.Combine(repo.Root, directory, "a.sln");
         await File.WriteAllTextAsync(solution, "", TestContext.Current.CancellationToken);
-        await File.WriteAllTextAsync(Path.Combine(repo.Root, "Shop.cs"), Shop, TestContext.Current.CancellationToken);
-        repo.Git("add", "a.sln", "Shop.cs");
+        await File.WriteAllTextAsync(Path.Combine(repo.Root, directory, "Shop.cs"), Shop, TestContext.Current.CancellationToken);
+        repo.Git("add", ".");
         repo.Commit();
         provider.Codebases[solution] = await CSharpSnippet.FactsAsync(("Shop.cs", Shop));
     }

@@ -56,8 +56,8 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
     /// <summary>
     /// Each problem a clash holds red: each one the user has not judged yet, and each one he answered replace to while
     /// its subject's code is the code he answered about. A replace about a subject that was gone holds nothing. The
-    /// finding of a replace is the validator's, with the user's words after it. The code of each held subject is
-    /// stored, so a later fix can show it.
+    /// finding of a replace is the validator's, with the user's words after it. It writes nothing: a hold
+    /// carries its subject's text, which `navarone` stores so a later fix can show it.
     /// </summary>
     public List<Hold> Holds()
     {
@@ -98,10 +98,10 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
         var refusal = clash.Refusal;
         if (!subjects.TryGetValue(new SymbolId(refusal.Symbol), out var subject))
         {
-            return new Hold(refusal.Id, refusal.Check, refusal.Symbol, clash.Defended.Path, clash.Defended.Line, says, null);
+            return new Hold(refusal.Id, refusal.Check, refusal.Symbol, clash.Defended.Path, clash.Defended.Line, clash.Defended.Line, says, null);
         }
 
-        return new Hold(refusal.Id, refusal.Check, refusal.Symbol, subject.Path, subject.Line, says, subject.Text);
+        return new Hold(refusal.Id, refusal.Check, refusal.Symbol, subject.Path, subject.Line, subject.EndLine, says, subject.Text);
     }
 
     // The hash of the code of the subject with the given symbol now, or null when it is gone.

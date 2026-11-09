@@ -10,12 +10,18 @@ namespace Navarone.Engine;
 /// </summary>
 public sealed class CodeMap
 {
+    private readonly string repoRoot;
+    private readonly IReadOnlyList<string> codebases;
     private readonly List<MappedMethod> methods;
-    private readonly List<MappedProblem> problems;
+    private readonly Dictionary<SymbolId, string> names;
+    private readonly List<SeenProblem> problems;
 
-    private CodeMap(List<MappedMethod> methods, List<MappedProblem> problems)
+    private CodeMap(string repoRoot, IReadOnlyList<string> codebases, List<MappedMethod> methods, Dictionary<SymbolId, string> names, List<SeenProblem> problems)
     {
+        this.repoRoot = repoRoot;
+        this.codebases = codebases;
         this.methods = methods;
+        this.names = names;
         this.problems = problems;
     }
 
@@ -23,7 +29,7 @@ public sealed class CodeMap
     /// The map of the given facts. A method no lens can name, such as an accessor, is not in it. A problem's method is
     /// null when its subject is no method a lens can name.
     /// </summary>
-    internal static CodeMap Of(CodebaseFacts facts, Code code, IReadOnlyList<SeenProblem> seen)
+    internal static CodeMap Of(CodebaseFacts facts, string repoRoot, IReadOnlyList<string> codebases, IReadOnlyList<SeenProblem> seen)
     {
         var queries = new LensQueries(facts);
         var names = new Dictionary<SymbolId, string>();
@@ -39,19 +45,11 @@ public sealed class CodeMap
                 }
 
                 names.TryAdd(method.Symbol, name);
-                var path = RepoPath(code, method.Location.Path);
-                mapped.Add(new MappedMethod(path, name, method.Written.Line, method.Written.EndLine, type.Name));
+                mapped.Add(new MappedMethod(method.Location.Path, name, method.Written.Line, method.Written.EndLine, type.Name));
             }
         }
 
-        var found = new List<MappedProblem>();
-        foreach (var each in seen)
-        {
-            var path = RepoPath(code, each.Path);
-            found.Add(new MappedProblem(each.Id, each.Check, path, each.First, each.Last, names.GetValueOrDefault(each.Symbol), each.Clash, each.Says));
-        }
-
-        return new CodeMap(mapped, found);
+        return new CodeMap(repoRoot, codebases, mapped, names, [.. seen]);
     }
 
     /// <summary>
@@ -61,7 +59,8 @@ public sealed class CodeMap
     public JsonObject Json(string? commit, IReadOnlyList<string> changed)
     {
         var files = new JsonArray();
-        foreach (var file in methods.GroupBy(method => method.Path).OrderBy(file => file.Key, StringComparer.Ordinal))
+        var byPath = methods.GroupBy(method => RepoPath(method.Path)).OrderBy(file => file.Key, StringComparer.Ordinal);
+        foreach (var file in byPath)
         {
             var inFile = file.OrderBy(method => method.First).ThenBy(method => method.Name, StringComparer.Ordinal);
             files.Add(new JsonObject
@@ -93,7 +92,7 @@ public sealed class CodeMap
         ["type"] = method.Type,
     };
 
-    private static JsonNode ProblemJson(MappedProblem problem)
+    private JsonNode ProblemJson(SeenProblem problem)
     {
         var state = "red";
         if (problem.Clash)
@@ -101,13 +100,14 @@ public sealed class CodeMap
             state = "clash";
         }
 
+        var method = names.GetValueOrDefault(problem.Symbol);
         return new JsonObject
         {
             ["id"] = problem.Id,
-            ["path"] = problem.Path,
+            ["path"] = RepoPath(problem.Path),
             ["firstLine"] = problem.First,
             ["lastLine"] = problem.Last,
-            ["method"] = problem.Method,
+            ["method"] = method,
             ["check"] = problem.Check,
             ["state"] = state,
             ["question"] = problem.Says,
@@ -115,13 +115,14 @@ public sealed class CodeMap
     }
 
     // A fact's path is relative to its codebase's directory. The repo-relative path is the one of the codebases'
-    // directories under which the file exists; with none, the path as it is.
-    private static string RepoPath(Code code, string path)
+    // directories under which the file exists; with none, such as a file of a subject that is gone, the path as it is.
+    private string RepoPath(string path)
     {
-        var root = Path.GetFullPath(code.RepoRoot);
-        foreach (var codebase in code.Codebases)
+        var root = Path.GetFullPath(repoRoot);
+        foreach (var codebase in codebases)
         {
-            var directory = Path.GetDirectoryName(Path.GetFullPath(codebase)) ?? root;
+            // A codebase is a file under the repo root, so its path has a directory.
+            var directory = Path.GetDirectoryName(Path.GetFullPath(codebase))!;
             var file = Path.GetFullPath(Path.Combine(directory, path));
             if (File.Exists(file))
             {
@@ -133,9 +134,7 @@ public sealed class CodeMap
     }
 
     private sealed record MappedMethod(string Path, string Name, int First, int Last, string Type);
-
-    private sealed record MappedProblem(string? Id, string Check, string Path, int First, int Last, string? Method, bool Clash, string Says);
 }
 
-/// <summary>A red problem as the map sees it, before its path and method are named: where its subject is, and whether a clash holds it.</summary>
+/// <summary>A red problem as the map sees it: where its subject is, relative to its codebase, and whether a clash holds it.</summary>
 internal sealed record SeenProblem(string? Id, string Check, SymbolId Symbol, string Path, int First, int Last, bool Clash, string Says);

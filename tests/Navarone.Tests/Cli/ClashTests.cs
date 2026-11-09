@@ -69,6 +69,22 @@ public sealed class ClashTests : IDisposable
     }
 
     [Fact]
+    public async Task TheMapPrintsAClashHeldProblemWhoseSubjectIsGoneAtTheLinesAndPathTheBuilderDefended()
+    {
+        await ClashOnAReasonAsync();
+        Codebase(("Other", 1, "other"));
+        output.GetStringBuilder().Clear();
+
+        Assert.Equal(ExitCodes.Printed, await RunAsync("map", "--json"));
+
+        // The subject is gone, so the hold keeps the path as the builder defended it, relative to its codebase's
+        // directory, the line it defended, and no method.
+        var problem = Assert.Single(JsonNode.Parse(output.ToString())!["problems"]!.AsArray())!;
+        Assert.Equal(("0000001", "clash", "T.cs", 1, 1), ((string?)problem["id"], (string?)problem["state"], (string?)problem["path"], (int)problem["firstLine"]!, (int)problem["lastLine"]!));
+        Assert.Null(problem["method"]);
+    }
+
+    [Fact]
     public async Task AClashHoldsTheProblemRedOutsideTheChangeToo()
     {
         Directory.Delete(Path.Combine(repo.Root, ".git"));

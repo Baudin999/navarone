@@ -45,16 +45,8 @@ public static class Analysis
         Coverage coverage,
         CancellationToken cancellationToken)
     {
-        var (facts, subjects) = await LoadAsync(setup, paths, cancellationToken).ConfigureAwait(false);
-        var place = EventPlace.Of(setup.RepoRoot);
-        var history = WorktreeHistory.Of(setup.Events.Read(), place.Worktree);
-        var written = subjects.ToDictionary(pair => pair.Key, pair => pair.Value.Written);
-        var clashes = new WorktreeClashes(history, written);
-        var judged = clashes.Collect(setup.Answers);
-        var kept = WorktreeClashes.Kept(judged);
-        var found = CheckedRepo.Of(setup, facts, subjects, kept);
+        var (facts, subjects, place, history, judged, found, holds) = await CheckWorktreeAsync(setup, paths, cancellationToken).ConfigureAwait(false);
         found.Save();
-        var holds = clashes.Holds();
         var held = holds.Select(hold => hold.Id).ToHashSet(StringComparer.Ordinal);
         var shown = found.Problems.Where(problem => problem.ShownBy(coverage)).ToList();
         var free = shown.Where(problem => !held.Contains(problem.Verdict.Problem.Id.Value)).ToList();
@@ -92,16 +84,7 @@ public static class Analysis
     /// </summary>
     public static async Task<CodeMap> MapAsync(EngineSetup setup, IReadOnlyList<string> paths, CancellationToken cancellationToken)
     {
-        var code = new Code(setup.Provider, setup.RepoRoot, paths);
-        var facts = await code.FactsAsync(cancellationToken).ConfigureAwait(false);
-        var subjects = Subject.AllIn(facts);
-        var place = EventPlace.Of(setup.RepoRoot);
-        var history = WorktreeHistory.Of(setup.Events.Read(), place.Worktree);
-        var written = subjects.ToDictionary(pair => pair.Key, pair => pair.Value.Written);
-        var clashes = new WorktreeClashes(history, written);
-        var kept = WorktreeClashes.Kept(clashes.Collect(setup.Answers));
-        var found = CheckedRepo.Of(setup, facts, subjects, kept);
-        var holds = clashes.Holds();
+        var (facts, subjects, _, _, _, found, holds) = await CheckWorktreeAsync(setup, paths, cancellationToken).ConfigureAwait(false);
         var held = holds.Select(hold => hold.Id).ToHashSet(StringComparer.Ordinal);
         var ungranted = found.Granted.Select(raised => raised.Id).ToHashSet(StringComparer.Ordinal);
 
@@ -128,17 +111,26 @@ public static class Analysis
 
         foreach (var hold in holds)
         {
-            var symbol = new SymbolId(hold.Symbol);
-            var last = hold.Line;
-            if (subjects.TryGetValue(symbol, out var subject))
-            {
-                last = subject.Places[0].EndLine;
-            }
-
-            seen.Add(new SeenProblem(hold.Id, hold.Check, symbol, hold.Path, hold.Line, last, true, hold.Says));
+            seen.Add(new SeenProblem(hold.Id, hold.Check, new SymbolId(hold.Symbol), hold.Path, hold.Line, hold.EndLine, true, hold.Says));
         }
 
-        return CodeMap.Of(facts, code, seen);
+        return CodeMap.Of(facts, setup.RepoRoot, paths, seen);
+    }
+
+    // What checking this worktree's code holds, for a run and for the map: the facts and each subject, where the run
+    // is and the worktree's history, the clashes the user judged, every problem as the code is now, and the problems a
+    // clash holds red. It writes nothing.
+    private static async Task<WorktreeCheck> CheckWorktreeAsync(EngineSetup setup, IReadOnlyList<string> paths, CancellationToken cancellationToken)
+    {
+        var (facts, subjects) = await LoadAsync(setup, paths, cancellationToken).ConfigureAwait(false);
+        var place = EventPlace.Of(setup.RepoRoot);
+        var history = WorktreeHistory.Of(setup.Events.Read(), place.Worktree);
+        var written = subjects.ToDictionary(pair => pair.Key, pair => pair.Value.Written);
+        var clashes = new WorktreeClashes(history, written);
+        var judged = clashes.Collect(setup.Answers);
+        var kept = WorktreeClashes.Kept(judged);
+        var found = CheckedRepo.Of(setup, facts, subjects, kept);
+        return new WorktreeCheck(facts, subjects, place, history, judged, found, clashes.Holds());
     }
 
     /// <summary>Writes what the given run made happen, then the run itself, with its cost in tokens, to the event log.</summary>
@@ -479,3 +471,13 @@ public static class Analysis
         return (merged, Subject.AllIn(merged));
     }
 }
+
+/// <summary>What checking a worktree's code holds: see Analysis.CheckWorktreeAsync.</summary>
+internal sealed record WorktreeCheck(
+    CodebaseFacts Facts,
+    Dictionary<SymbolId, Subject> Subjects,
+    EventPlace Place,
+    WorktreeHistory History,
+    List<(Clash Clash, SettledEvent Answer)> Judged,
+    CheckedRepo Found,
+    List<Hold> Holds);

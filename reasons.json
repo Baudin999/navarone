@@ -456,7 +456,7 @@
       "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
       "value": 42,
       "resolution": {
-        "reason": "Parse is the grammar of navarone and nothing else: each arm is one form of the usage text, written as its words in a list pattern, and returns the command value that form names. The paths are those words, each constant a list element tests, not logic. The new map --json arm is one more form. Cutting the arms further, by first word, would scatter one grammar over several methods and split-complexity would count them back.",
+        "reason": "Parse is the grammar of navarone and nothing else: each arm is one form of the usage text, written as its words in a list pattern, and returns the command value that form names. The paths are those words, each constant a list element tests, not logic. The cost, the repo wiring and the handlers moved out to Command, the runner in Commands and the command classes, as Kelk decided. Cutting the arms further, by first word, would scatter one grammar over several methods and split-complexity would count them back. The map --json arm is one more form.",
         "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
         "value": 42
       }
@@ -480,7 +480,7 @@
       "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
       "value": 30,
       "resolution": {
-        "reason": "Parse is hard to read only in the count: it is one flat switch, one arm per form of the usage text, each arm the form\u0027s words in a list pattern and the command value it names. Nothing nests and no arm does a second thing; map --json is one more arm. The id-shape guards are the boundary check kept in the parser.",
+        "reason": "Parse is hard to read only in the count: it is one flat switch, one arm per form of the usage text, each arm the form\u0027s words in a list pattern and the command value it names. Nothing nests and no arm does a second thing; the cost, the repo wiring and the handlers live in Command, Commands and the command classes. The id-shape guards are the boundary check Kelk kept in the parser. The map --json arm is one more form.",
         "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
         "value": 30
       }
