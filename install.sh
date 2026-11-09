@@ -18,11 +18,12 @@
 #             loads it into every agent, so an edit here reaches them without installing again. A file there that is
 #             not a link is left alone and the install says so. It removes CLAUDE_CONFIG_DIR/rules/taste.md when it is
 #             a link whose target no longer exists: NAVARONE.md replaced it.
-#   sources   when brain is installed, keeps the navarone line of BRAIN_HOME/sources.tsv at five columns:
-#             `navarone<TAB>list<TAB>context<TAB>events<TAB>code`, the commands being
+#   sources   when brain is installed, keeps the navarone line of BRAIN_HOME/sources.tsv at six columns:
+#             `navarone<TAB>list<TAB>context<TAB>events<TAB>code<TAB>classes`, the commands being
 #             `'<LOCAL_BIN>/navarone' disputes --json`, `'<LOCAL_BIN>/navarone' lens --json` (brain's window runs it
-#             with a lens's words as arguments), `'<LOCAL_BIN>/navarone' events --json` and
-#             `'<LOCAL_BIN>/navarone' code` (brain appends the hash as one argument). No navarone line yet: the full
+#             with a lens's words as arguments), `'<LOCAL_BIN>/navarone' events --json`,
+#             `'<LOCAL_BIN>/navarone' code` (brain appends the hash as one argument) and
+#             `'<LOCAL_BIN>/navarone' classes` (brain appends a file's path and `--json`). No navarone line yet: the full
 #             line is added. A line with fewer columns gets the missing ones from where it stops and keeps every
 #             column it has; a blank column at the end counts as missing. A full line is kept as it is. Each case
 #             prints one line saying which. The commands name navarone by its absolute path, quoted for sh, because
@@ -131,12 +132,13 @@ sources="$brain_home/sources.tsv"
 # arguments: the path goes in single quotes, each ' in it as '\''.
 quoted="'$(sed "s/'/'\\\\''/g" <<<"$local_bin/navarone")'"
 
-# The five columns of the navarone line: name, list, context, events and code commands. brain appends the lens's words
-# to the context command and the hash to the code command.
+# The six columns of the navarone line: name, list, context, events, code and classes commands. brain appends the lens's
+# words to the context command, the hash to the code command, and a file's path and --json to the classes command.
 list="$quoted disputes --json"
 lens="$quoted lens --json"
 events="$quoted events --json"
 code="$quoted code"
+classes="$quoted classes"
 
 # One pass over sources.tsv decides the outcome. A navarone line with fewer columns gets the missing ones from where it
 # stops and keeps the columns it has; a column that is blank at the end counts as missing. No navarone line: the full
@@ -145,12 +147,13 @@ code="$quoted code"
 completed="$(mktemp)"
 trap 'rm -f "$completed"' EXIT
 [[ -e "$sources" ]] || : >"$sources"
-outcome="$(OUT="$completed" LIST="$list" LENS="$lens" EVENTS="$events" CODE="$code" awk -F '\t' '
+outcome="$(OUT="$completed" LIST="$list" LENS="$lens" EVENTS="$events" CODE="$code" CLASSES="$classes" awk -F '\t' '
     BEGIN {
         defaults[2] = ENVIRON["LIST"]
         defaults[3] = ENVIRON["LENS"]
         defaults[4] = ENVIRON["EVENTS"]
         defaults[5] = ENVIRON["CODE"]
+        defaults[6] = ENVIRON["CLASSES"]
         out = ENVIRON["OUT"]
         outcome = "added"
     }
@@ -161,19 +164,19 @@ outcome="$(OUT="$completed" LIST="$list" LENS="$lens" EVENTS="$events" CODE="$co
         last = NF
         while (last > 1 && $last ~ /^[ ]*$/) { last-- }
         line = $1
-        for (column = 2; column <= 5; column++) {
+        for (column = 2; column <= 6; column++) {
             line = line "\t" (column <= last ? $column : defaults[column])
         }
-        for (column = 6; column <= NF; column++) {
+        for (column = 7; column <= NF; column++) {
             line = line "\t" $column
         }
-        if (last < 5) { changed = 1 }
+        if (last < 6) { changed = 1 }
         if (outcome == "added") { outcome = "kept" }
         print line > out
     }
     END {
         if (outcome == "added") {
-            print "navarone\t" defaults[2] "\t" defaults[3] "\t" defaults[4] "\t" defaults[5] > out
+            print "navarone\t" defaults[2] "\t" defaults[3] "\t" defaults[4] "\t" defaults[5] "\t" defaults[6] > out
         }
         if (changed) { outcome = "completed" }
         print outcome

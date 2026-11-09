@@ -49,7 +49,9 @@ public sealed class InstallScriptTests : IDisposable
 
     private string Code => $"'{LocalBin}/navarone' code";
 
-    private string Line => $"navarone\t'{LocalBin}/navarone' disputes --json\t{Lens}\t{Events}\t{Code}\n";
+    private string Classes => $"'{LocalBin}/navarone' classes";
+
+    private string Line => $"navarone\t'{LocalBin}/navarone' disputes --json\t{Lens}\t{Events}\t{Code}\t{Classes}\n";
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 
@@ -96,10 +98,10 @@ public sealed class InstallScriptTests : IDisposable
     }
 
     [Fact]
-    public async Task AnExistingNavaroneLineWithAllFiveColumnsIsKeptAndSaysSo()
+    public async Task AnExistingNavaroneLineWithAllSixColumnsIsKeptAndSaysSo()
     {
         Directory.CreateDirectory(BrainHome);
-        const string own = "navarone\tmy list\tmy lens\tmy events\tmy code\n";
+        const string own = "navarone\tmy list\tmy lens\tmy events\tmy code\tmy classes\n";
         await File.WriteAllTextAsync(Sources, own, TestContext.Current.CancellationToken);
 
         var printed = await InstallAsync();
@@ -109,7 +111,7 @@ public sealed class InstallScriptTests : IDisposable
     }
 
     [Fact]
-    public async Task AnExistingNavaroneLineWithThreeColumnsKeepsThemAndGetsTheEventsAndCodeCommandsOnce()
+    public async Task AnExistingNavaroneLineWithThreeColumnsKeepsThemAndGetsTheEventsCodeAndClassesCommandsOnce()
     {
         Directory.CreateDirectory(BrainHome);
         await File.WriteAllTextAsync(Sources, "navarone\tmy list\tmy lens\n", TestContext.Current.CancellationToken);
@@ -118,7 +120,7 @@ public sealed class InstallScriptTests : IDisposable
         var sources = await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken);
         var again = await InstallAsync();
 
-        Assert.Equal($"navarone\tmy list\tmy lens\t{Events}\t{Code}\n", sources);
+        Assert.Equal($"navarone\tmy list\tmy lens\t{Events}\t{Code}\t{Classes}\n", sources);
         Assert.Contains("completed the navarone line", printed);
         Assert.Equal(sources, await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
         Assert.Contains("kept the navarone line", again);
@@ -128,7 +130,7 @@ public sealed class InstallScriptTests : IDisposable
     public async Task AFullNavaroneLineAsTheLastLineWithoutANewlineIsKeptAsItIs()
     {
         Directory.CreateDirectory(BrainHome);
-        const string own = "other\tother list\nnavarone\ta\tb\tc\td";
+        const string own = "other\tother list\nnavarone\ta\tb\tc\td\te\tf";
         await File.WriteAllTextAsync(Sources, own, TestContext.Current.CancellationToken);
 
         var printed = await InstallAsync();
@@ -145,18 +147,34 @@ public sealed class InstallScriptTests : IDisposable
 
         await InstallAsync();
 
-        Assert.Equal($"navarone\tmy list\t{Lens}\t{Events}\t{Code}\n", await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
+        Assert.Equal($"navarone\tmy list\t{Lens}\t{Events}\t{Code}\t{Classes}\n", await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
     }
 
     [Fact]
-    public async Task AnExistingNavaroneLineWithFourColumnsGetsOnlyTheCodeCommand()
+    public async Task AnExistingNavaroneLineWithFourColumnsGetsOnlyTheCodeAndClassesCommands()
     {
         Directory.CreateDirectory(BrainHome);
         await File.WriteAllTextAsync(Sources, "navarone\tmy list\tmy lens\tmy events\n", TestContext.Current.CancellationToken);
 
         await InstallAsync();
 
-        Assert.Equal($"navarone\tmy list\tmy lens\tmy events\t{Code}\n", await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
+        Assert.Equal($"navarone\tmy list\tmy lens\tmy events\t{Code}\t{Classes}\n", await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task AnExistingNavaroneLineWithFiveColumnsGetsOnlyTheClassesCommandAndItsCommandTakesAPathAndJson()
+    {
+        Directory.CreateDirectory(BrainHome);
+        await File.WriteAllTextAsync(Sources, "navarone\ta\tb\tc\td\n", TestContext.Current.CancellationToken);
+
+        await InstallAsync();
+        var line = await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken);
+        var command = line.Split('\t')[5].TrimEnd('\n');
+        var (code, printed) = await RunAsync("/bin/sh", ["-c", $"set -- {command} \"$@\"; printf '%s|' \"$@\"", "sh", "src/My File's.cs", "--json"]);
+
+        Assert.Equal($"navarone\ta\tb\tc\td\t{Classes}\n", line);
+        Assert.Equal(0, code);
+        Assert.Equal($"{LocalBin}/navarone|classes|src/My File's.cs|--json|", printed);
     }
 
     [Fact]
@@ -169,7 +187,7 @@ public sealed class InstallScriptTests : IDisposable
         var sources = await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken);
         await InstallAsync();
 
-        Assert.Equal($"# my sources\nother\tother list\nnavarone\tmy own navarone --json\t{Lens}\t{Events}\t{Code}\n", sources);
+        Assert.Equal($"# my sources\nother\tother list\nnavarone\tmy own navarone --json\t{Lens}\t{Events}\t{Code}\t{Classes}\n", sources);
         Assert.Equal(sources, await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
     }
 
