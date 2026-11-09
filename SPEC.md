@@ -246,21 +246,21 @@ again. A file there that is not a link is left alone, and the install says
 so. It removes `<CLAUDE_CONFIG_DIR>/rules/taste.md` only when it is a link
 whose target is gone, and says so. When brain is installed, it keeps the
 navarone line of `<BRAIN_HOME>/sources.tsv` at six columns:
-`navarone<TAB>list<TAB>context<TAB>events<TAB>code<TAB>classes`. The list command is
-`'<path>/navarone' disputes --json`. The context command is
+`navarone<TAB>list<TAB>context<TAB>events<TAB>code<TAB>classes`. The list
+command is `'<path>/navarone' disputes --json`. The context command is
 `'<path>/navarone' lens --json`; brain's window runs it with a lens's words
 after it, each word one argument, never through a shell. The events command
 is `'<path>/navarone' events --json`. The code command is
-`'<path>/navarone' code`; brain appends the hash as one argument. The classes
-command is `'<path>/navarone' classes`; brain appends a file's path and
-`--json`, each one argument, never through a shell. No navarone
-line yet: the full line is added. A line with fewer columns gets the missing
-ones from where it stops and keeps every column it has, a blank column at
-the end counting as missing; a full line is kept as it is. Each case prints
-one line saying which. The commands name the linked `navarone` by its
-absolute path, quoted for sh, because brain's server may run without
-`~/.local/bin` on PATH. No agent writes that file: brain runs its commands
-as the user. The publish goes through the machine's guard when there is one.
+`'<path>/navarone' code`; brain appends the hash as one argument. The
+classes command is `'<path>/navarone' classes`; brain appends a file's path
+and `--json`, each one argument, never through a shell. No navarone line
+yet: the full line is added. A line with fewer columns gets the missing ones
+from where it stops and keeps every column it has, a blank column at the end
+counting as missing; a full line is kept as it is. Each case prints one line
+saying which. The commands name the linked `navarone` by its absolute path,
+quoted for sh, because brain's server may run without `~/.local/bin` on
+PATH. No agent writes that file: brain runs its commands as the user. The
+publish goes through the machine's guard when there is one.
 
 ## CLI
 One command. Agents may run it themselves.

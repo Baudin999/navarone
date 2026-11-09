@@ -21,13 +21,12 @@
 #   sources   when brain is installed, keeps the navarone line of BRAIN_HOME/sources.tsv at six columns:
 #             `navarone<TAB>list<TAB>context<TAB>events<TAB>code<TAB>classes`, the commands being
 #             `'<LOCAL_BIN>/navarone' disputes --json`, `'<LOCAL_BIN>/navarone' lens --json` (brain's window runs it
-#             with a lens's words as arguments), `'<LOCAL_BIN>/navarone' events --json`,
-#             `'<LOCAL_BIN>/navarone' code` (brain appends the hash as one argument) and
-#             `'<LOCAL_BIN>/navarone' classes` (brain appends a file's path and `--json`). No navarone line yet: the full
-#             line is added. A line with fewer columns gets the missing ones from where it stops and keeps every
-#             column it has; a blank column at the end counts as missing. A full line is kept as it is. Each case
-#             prints one line saying which. The commands name navarone by its absolute path, quoted for sh, because
-#             brain's server may run without LOCAL_BIN on PATH.
+#             with a lens's words as arguments), `'<LOCAL_BIN>/navarone' events --json`, `'<LOCAL_BIN>/navarone' code`
+#             (brain appends the hash as one argument) and `'<LOCAL_BIN>/navarone' classes` (brain appends a file's path
+#             and `--json`). No navarone line yet: the full line is added. A line with fewer columns gets the missing
+#             ones from where it stops and keeps every column it has; a blank column at the end counts as missing. A
+#             full line is kept as it is. Each case prints one line saying which. The commands name navarone by its
+#             absolute path, quoted for sh, because brain's server may run without LOCAL_BIN on PATH.
 #
 # Brain is installed when its home exists. Running it again publishes again and changes nothing else.
 #

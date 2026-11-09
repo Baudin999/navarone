@@ -162,17 +162,25 @@ public sealed class InstallScriptTests : IDisposable
     }
 
     [Fact]
-    public async Task AnExistingNavaroneLineWithFiveColumnsGetsOnlyTheClassesCommandAndItsCommandTakesAPathAndJson()
+    public async Task AnExistingNavaroneLineWithFiveColumnsGetsOnlyTheClassesCommand()
     {
         Directory.CreateDirectory(BrainHome);
         await File.WriteAllTextAsync(Sources, "navarone\ta\tb\tc\td\n", TestContext.Current.CancellationToken);
 
         await InstallAsync();
-        var line = await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken);
-        var command = line.Split('\t')[5].TrimEnd('\n');
+
+        Assert.Equal($"navarone\ta\tb\tc\td\t{Classes}\n", await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task TheClassesCommandInTheSourcesLineTakesAPathAndJsonAsArgumentsUntouched()
+    {
+        Directory.CreateDirectory(BrainHome);
+        await InstallAsync();
+        var command = (await File.ReadAllTextAsync(Sources, TestContext.Current.CancellationToken)).Split('\t')[5].TrimEnd('\n');
+
         var (code, printed) = await RunAsync("/bin/sh", ["-c", $"set -- {command} \"$@\"; printf '%s|' \"$@\"", "sh", "src/My File's.cs", "--json"]);
 
-        Assert.Equal($"navarone\ta\tb\tc\td\t{Classes}\n", line);
         Assert.Equal(0, code);
         Assert.Equal($"{LocalBin}/navarone|classes|src/My File's.cs|--json|", printed);
     }
