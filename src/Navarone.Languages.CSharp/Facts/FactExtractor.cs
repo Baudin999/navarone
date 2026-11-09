@@ -8,7 +8,7 @@ namespace Navarone.Languages.CSharp.Facts;
 
 /// <summary>
 /// Turns a loaded solution into facts: it walks the solution's documents and hands each type to its TypeBuilder, each
-/// member to MethodReader and InitializerReader. Each call and field use is the symbol the compiler binds it to, as
+/// member to MethodReader, PropertyReader and InitializerReader. Each call and field use is the symbol the compiler binds it to, as
 /// SymbolUses reads it, so the facts name declarations, not text. The `// navarone: &lt;id&gt;` comments at a method
 /// or a class become its NavaroneIds.
 /// </summary>
@@ -131,7 +131,14 @@ internal static class FactExtractor
             builder.AddDeclaration(location, ids, code, written);
             foreach (var member in declaration.Members)
             {
-                builder.Methods.AddRange(MethodReader.MethodsOf(member, model, path, cancellationToken));
+                var methods = MethodReader.MethodsOf(member, model, path, cancellationToken);
+                builder.Methods.AddRange(methods);
+                var property = PropertyReader.PropertyOf(member, methods, model, path, cancellationToken);
+                if (property is not null)
+                {
+                    builder.Properties.Add(property);
+                }
+
                 builder.Methods.AddRange(InitializerReader.InitializersOf(member, model, path, cancellationToken));
                 var bodiless = MethodReader.BodilessOf(member, model, path, cancellationToken);
                 if (bodiless is not null)

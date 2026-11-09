@@ -8,9 +8,9 @@ namespace Navarone.Engine;
 
 /// <summary>
 /// The class view of one source file for a reader: every type declared in it with its assembly, namespace and lines,
-/// and each of its members with its kind, whether it is public, its lines, its name in a lens and the piece of the
-/// class it belongs to, as the check that splits a class into pieces counts them. It is built from facts and writes
-/// nothing.
+/// and each of its members with its kind, whether it is declared public, its lines, its name in a lens and the piece of
+/// the class it belongs to, as the check that splits a class into pieces counts them. It is built from facts and
+/// writes nothing.
 /// </summary>
 public sealed class ClassView
 {
@@ -62,16 +62,17 @@ public sealed class ClassView
                 outer = names.GetValueOrDefault(containing);
             }
 
-            Lcom4View? lcom4 = null;
-            var numbers = new Dictionary<SymbolId, int?>();
-            if (check?.Pieces(type) is { } pieces)
+            PiecesView? measured = null;
+            var numbers = PieceNumbers.None;
+            var pieces = check?.Pieces(type);
+            if (check is not null && pieces is not null)
             {
-                lcom4 = new Lcom4View(pieces.Count, limits.For(check.Id));
-                numbers = PieceNumbers(pieces);
+                measured = new PiecesView(check.Id, pieces.Count, limits.For(check.Id));
+                numbers = new PieceNumbers(pieces);
             }
 
             var members = MembersOf(type, queries, numbers);
-            viewed.Add(new ViewedType(type.Assembly, type.Namespace, type.Name, outer, type.Written.Line, type.Written.EndLine, lcom4, members));
+            viewed.Add(new ViewedType(type.Assembly, type.Namespace, type.Name, outer, type.Written.Line, type.Written.EndLine, measured, members));
         }
 
         List<ViewedType> ordered = [.. viewed.OrderBy(type => type.First).ThenBy(type => type.Name, StringComparer.Ordinal)];
@@ -80,8 +81,8 @@ public sealed class ClassView
 
     /// <summary>
     /// The class view as one JSON document: the commit, the file's path and every type in it in line order, each with
-    /// its members in line order. A type the check does not measure, such as an interface, has a null lcom4, and a
-    /// member in no piece a null piece.
+    /// its members in the order written. A type the check does not measure, such as an interface, has null pieces, and
+    /// a member in no piece a null piece.
     /// </summary>
     public JsonObject Json(string? commit)
     {
@@ -93,11 +94,12 @@ public sealed class ClassView
         };
     }
 
-    // Each method a type declares in its file, but for an initializer, which its field stands for, and each field.
-    private static List<ViewedMember> MembersOf(TypeFacts type, LensQueries queries, Dictionary<SymbolId, int?> pieces)
+    // Each field, property and method a type declares in its file, in the order written. A property with a body stands
+    // for its accessors, and a field for its initializer.
+    private static List<ViewedMember> MembersOf(TypeFacts type, LensQueries queries, PieceNumbers pieces)
     {
         var file = type.Location.Path;
-        var fields = type.Fields.Select(field => field.Symbol).ToHashSet();
+        var standIns = type.Fields.Select(field => field.Symbol).ToHashSet();
         var members = new List<ViewedMember>();
         foreach (var field in type.Fields)
         {
@@ -112,13 +114,27 @@ public sealed class ClassView
                 kind = Property;
             }
 
-            var piece = pieces.GetValueOrDefault(field.Symbol);
-            members.Add(new ViewedMember(field.Name, kind, field.IsPublic, field.Written.Line, field.Written.EndLine, null, piece));
+            var written = field.Written;
+            members.Add(new ViewedMember(field.Name, kind, field.IsPublic, written.Line, written.EndLine, field.Location.Column, null, pieces.Of(field.Symbol), []));
         }
 
-        foreach (var method in type.Methods.DistinctBy(method => method.Symbol))
+        foreach (var property in type.Properties)
         {
-            if (fields.Contains(method.Symbol))
+            List<SymbolId> accessors = [.. property.Accessors.Select(accessor => accessor.Method)];
+            standIns.UnionWith(accessors);
+            if (property.Location.Path != file)
+            {
+                continue;
+            }
+
+            var viewed = AccessorsOf(property, type.Methods, pieces);
+            var written = property.Written;
+            members.Add(new ViewedMember(property.Name, Property, property.IsPublic, written.Line, written.EndLine, property.Location.Column, null, pieces.Shared(accessors), viewed));
+        }
+
+        foreach (var method in type.Methods)
+        {
+            if (standIns.Contains(method.Symbol))
             {
                 continue;
             }
@@ -128,51 +144,42 @@ public sealed class ClassView
                 continue;
             }
 
-            var lens = queries.NameOf(method);
-            var piece = pieces.GetValueOrDefault(method.Symbol);
-            members.Add(new ViewedMember(method.Name, KindOf(method), method.IsPublic, method.Written.Line, method.Written.EndLine, lens, piece));
-        }
-
-        return [.. members.OrderBy(member => member.First).ThenBy(member => member.Name, StringComparer.Ordinal)];
-    }
-
-    private static string KindOf(MethodFacts method)
-    {
-        if (method.IsConstructor)
-        {
-            return Constructor;
-        }
-
-        if (method.IsAccessor)
-        {
-            return Property;
-        }
-
-        return Method;
-    }
-
-    // The number of each piece, from 1, by the symbols of its methods and fields.
-    private static Dictionary<SymbolId, int?> PieceNumbers(IReadOnlyList<ClassPiece> pieces)
-    {
-        var numbers = new Dictionary<SymbolId, int?>();
-        for (var index = 0; index < pieces.Count; index++)
-        {
-            foreach (var symbol in pieces[index].Methods.Concat(pieces[index].Fields))
+            var kind = Method;
+            if (method.IsConstructor)
             {
-                numbers.TryAdd(symbol, index + 1);
+                kind = Constructor;
             }
+
+            var lens = queries.NameOf(method);
+            var written = method.Written;
+            members.Add(new ViewedMember(method.Name, kind, method.IsPublic, written.Line, written.EndLine, method.Location.Column, lens, pieces.Of(method.Symbol), []));
         }
 
-        return numbers;
+        return [.. members.OrderBy(member => member.First).ThenBy(member => member.Column)];
+    }
+
+    // Each accessor of the property with its own lines, whether its method is declared public, and its piece.
+    private static List<ViewedAccessor> AccessorsOf(PropertyFacts property, IReadOnlyList<MethodFacts> methods, PieceNumbers pieces)
+    {
+        var accessors = new List<ViewedAccessor>();
+        foreach (var accessor in property.Accessors)
+        {
+            var method = methods.First(method => method.Symbol == accessor.Method);
+            var written = accessor.Written;
+            accessors.Add(new ViewedAccessor(accessor.Side, method.IsPublic, written.Line, written.EndLine, pieces.Of(accessor.Method)));
+        }
+
+        return accessors;
     }
 
     private static JsonNode TypeJson(ViewedType type)
     {
-        JsonObject? lcom4 = null;
-        if (type.Lcom4 is { } measured)
+        JsonObject? pieces = null;
+        if (type.Pieces is { } measured)
         {
-            lcom4 = new JsonObject
+            pieces = new JsonObject
             {
+                ["check"] = measured.Check,
                 ["value"] = measured.Value,
                 ["limit"] = measured.Limit,
                 ["above"] = measured.Value > measured.Limit,
@@ -187,7 +194,7 @@ public sealed class ClassView
             ["containingType"] = type.Outer,
             ["firstLine"] = type.First,
             ["lastLine"] = type.Last,
-            ["lcom4"] = lcom4,
+            ["pieces"] = pieces,
             ["members"] = new JsonArray([.. type.Members.Select(MemberJson)]),
         };
     }
@@ -201,11 +208,66 @@ public sealed class ClassView
         ["lastLine"] = member.Last,
         ["lens"] = member.Lens,
         ["piece"] = member.Piece,
+        ["accessors"] = new JsonArray([.. member.Accessors.Select(AccessorJson)]),
     };
 
-    private sealed record ViewedType(string Assembly, string Namespace, string Name, string? Outer, int First, int Last, Lcom4View? Lcom4, List<ViewedMember> Members);
+    private static JsonNode AccessorJson(ViewedAccessor accessor) => new JsonObject
+    {
+        ["name"] = accessor.Side,
+        ["public"] = accessor.Public,
+        ["firstLine"] = accessor.First,
+        ["lastLine"] = accessor.Last,
+        ["piece"] = accessor.Piece,
+    };
 
-    private sealed record Lcom4View(int Value, int Limit);
+    private sealed record ViewedType(string Assembly, string Namespace, string Name, string? Outer, int First, int Last, PiecesView? Pieces, List<ViewedMember> Members);
 
-    private sealed record ViewedMember(string Name, string Kind, bool Public, int First, int Last, string? Lens, int? Piece);
+    private sealed record PiecesView(string Check, int Value, int Limit);
+
+    private sealed record ViewedMember(string Name, string Kind, bool Public, int First, int Last, int Column, string? Lens, int? Piece, List<ViewedAccessor> Accessors);
+
+    private sealed record ViewedAccessor(string Side, bool Public, int First, int Last, int? Piece);
+
+    // The number of each piece, from 1, by the symbols of its methods and fields.
+    private sealed class PieceNumbers
+    {
+        private readonly Dictionary<SymbolId, int> numbers = [];
+
+        public PieceNumbers(IReadOnlyList<ClassPiece> pieces)
+        {
+            for (var index = 0; index < pieces.Count; index++)
+            {
+                foreach (var symbol in pieces[index].Methods.Concat(pieces[index].Fields))
+                {
+                    numbers.TryAdd(symbol, index + 1);
+                }
+            }
+        }
+
+        // No piece for any symbol, for a type the check does not measure.
+        public static PieceNumbers None { get; } = new([]);
+
+        // The number of the piece that holds the symbol, or null for one in no piece.
+        public int? Of(SymbolId symbol)
+        {
+            if (numbers.TryGetValue(symbol, out var number))
+            {
+                return number;
+            }
+
+            return null;
+        }
+
+        // The piece all the symbols are in, or null when they are in different pieces or in none.
+        public int? Shared(IReadOnlyList<SymbolId> symbols)
+        {
+            var shared = symbols.Select(Of).Distinct().ToList();
+            if (shared is not [{ } piece])
+            {
+                return null;
+            }
+
+            return piece;
+        }
+    }
 }

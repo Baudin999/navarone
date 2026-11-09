@@ -1,5 +1,5 @@
 {
-  "granted": 89,
+  "granted": 91,
   "problems": [
     {
       "id": "0000001",
@@ -661,13 +661,21 @@
       "id": "0000089",
       "check": "split-complexity",
       "symbol": "Navarone.Engine::Navarone.Engine.ClassView.ReadAsync(EngineSetup, Code, string, CancellationToken)",
-      "fingerprint": "41d4540798c58deb0b0a9dcdf9858ab513a5ce751fa32d3f0ee39e882071b003",
-      "value": 16,
+      "fingerprint": "318e36c0a0a6ce66a3a9d68e0de305a4cfa741f45c00d77e4b3f355cd8b09cc8",
+      "value": 23,
       "resolution": {
-        "reason": "ReadAsync builds the class view in named steps, and each helper answers one rule of it. Of keeps the types whose first declaration is in the file and gives each its outer type and its lcom4 against the limit, MembersOf lists the fields and methods declared in that file and leaves out an initializer its field stands for, KindOf names a method constructor, property or method, and PieceNumbers numbers each piece\u0027s symbols from one. Inlined, the type walk, the member walk and the piece numbering would be three loops in one method doing three jobs.",
-        "fingerprint": "41d4540798c58deb0b0a9dcdf9858ab513a5ce751fa32d3f0ee39e882071b003",
-        "value": 16
+        "reason": "ReadAsync loads the facts and hands them to a view built in named steps, each helper one rule of the class view. Of keeps the types whose first declaration is in the file, with their outer type and their pieces against the check\u0027s limit. MembersOf lists the fields, properties and methods declared there in the order written, a property standing for its accessors and a field for its initializer, and AccessorsOf gives each accessor its own lines and piece. PieceNumbers numbers the pieces in its .ctor, Of looks up one symbol\u0027s piece and Shared finds the piece all of a property\u0027s accessors share. Inlined, the type walk, three member walks and the piece numbering would be one method doing five jobs.",
+        "fingerprint": "318e36c0a0a6ce66a3a9d68e0de305a4cfa741f45c00d77e4b3f355cd8b09cc8",
+        "value": 23
       }
+    },
+    {
+      "id": "0000090",
+      "check": "lcom4",
+      "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.MethodReader",
+      "fingerprint": "5b8de49abc294586925f6fa671614af09f1a39792247e6005ff97ddc5e9e711f",
+      "value": 2,
+      "resolution": null
     }
   ]
 }

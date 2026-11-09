@@ -1,7 +1,8 @@
 namespace Navarone.Engine.Facts;
 
 /// <summary>
-/// A class or struct: its own fields and its own methods. LCOM4 builds its graph from these.
+/// A class or struct: its own fields, its own properties with a body and its own methods. LCOM4 builds its graph from
+/// the fields and the methods; a property groups the methods that are its accessors.
 /// Name is the type's own short name, without its namespace or the type it is nested in.
 /// ContainingType is the type this one is declared in, or null for a top-level type.
 /// Namespace is the namespace it is declared in, in full, or empty for the global namespace. Assembly is the name of
@@ -21,6 +22,7 @@ public sealed record TypeFacts(
     string Assembly,
     SourceLocation Location,
     IReadOnlyList<FieldFacts> Fields,
+    IReadOnlyList<PropertyFacts> Properties,
     IReadOnlyList<MethodFacts> Methods,
     bool IsInterface,
     bool IsTest,

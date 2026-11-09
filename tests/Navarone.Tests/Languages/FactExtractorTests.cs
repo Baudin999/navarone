@@ -87,6 +87,29 @@ public sealed class FactExtractorTests
     }
 
     [Fact]
+    public async Task APropertyOrIndexerWithABodyHoldsItsAccessorsWithABodyAndAnAutoPropertyIsNone()
+    {
+        var facts = await CSharpSnippet.FactsAsync("""
+            class C
+            {
+                int a;
+                public int Auto { get; set; }
+                public int Total => a;
+                private int Mixed { get { return a; } init { a = value; } }
+                public int Half { get; private set { a = value; } }
+                int this[int i] { get { return a + i; } set { a = value; } }
+                event System.Action E { add { } remove { } }
+            }
+            """);
+
+        var type = facts.Types.Single(type => type.Name == "C");
+        var properties = type.Properties.Select(property => (property.Name, property.IsPublic, property.Written.Line, property.Written.EndLine, string.Join(' ', property.Accessors.Select(accessor => $"{accessor.Side}@{accessor.Written.Line}"))));
+        Assert.Equal([("Total", true, 5, 5, "get@5"), ("Mixed", false, 6, 6, "get@6 init@6"), ("Half", true, 7, 7, "set@7"), ("this[]", false, 8, 8, "get@8 set@8")], properties);
+        var methods = type.Methods.Select(method => method.Symbol).ToHashSet();
+        Assert.All(type.Properties.SelectMany(property => property.Accessors), accessor => Assert.Contains(accessor.Method, methods));
+    }
+
+    [Fact]
     public async Task ATypeNamesItsNamespaceInFullAndItsAssembly()
     {
         var facts = await CSharpSnippet.FactsAsync("""

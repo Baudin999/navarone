@@ -408,34 +408,45 @@ One command. Agents may run it themselves.
   - `commit` is the full hash of HEAD, or null outside git or with no commit
     yet, as in `map --json`, and `path` the file's path as the repo names it.
   - `types` holds one `{"assembly", "namespace", "name", "containingType",
-    "firstLine", "lastLine", "lcom4", "members"}` per type whose first
+    "firstLine", "lastLine", "pieces", "members"}` per type whose first
     declaration is in the file, a nested type included, in line order.
     `assembly` is the name of the assembly that compiles it, `namespace` its
     namespace in full, empty for the global namespace, and `name` its own short
     name. `containingType` is the short name of the type it is nested in, or
     null for a top-level type. The lines are those of its declaration as
-    written. `lcom4` is `{"value", "limit", "above"}`: the number of pieces the
-    lcom4 check counts, its limit, and whether the value is above the limit,
-    whatever answers the problem. It is null for a type lcom4 does not measure:
-    an interface and a test class.
+    written. `pieces` is `{"check", "value", "limit", "above"}`: the check that
+    splits a class into pieces, `lcom4`, the number of pieces it counts, its
+    limit, and whether the value is above the limit, whatever answers the
+    problem. It is null for a type the check does not measure: an interface
+    and a test class.
   - `members` holds one `{"name", "kind", "public", "firstLine", "lastLine",
-    "lens", "piece"}` per member declared in the file, in line order. `name`
-    is the name a question shows: `Parse(string)` for a method, `.ctor(int)`
-    for a constructor, `Total.get` for a property's accessor, and a field's or
-    auto-property's own name. `kind` is `method`, `constructor`, `property` or
-    `field`: an auto-property is one `property`, a property with a body is one
-    `property` per accessor, and the lines of an accessor start at its
-    property's signature. A primary constructor's captured parameter is a
-    `field`. An initializer is its field's. `public` is true for a member any
-    code may use. The lines are those of the member's declaration as written.
-    `lens` is the member's name in a lens, `Type.Method` with `:N` where the
-    name matches several overloads, as `navarone lens method` takes it, or
-    null for a member no lens can name, such as a constructor or an accessor.
-    `piece` is the number, from 1, of the lcom4 piece that holds the member,
-    in the order of the check's question, or null for a member in no piece:
-    a constructor, a field no method of a piece uses, and a method that uses
-    no instance field, calls no other method of the class and is called by
-    none.
+    "lens", "piece", "accessors"}` per member declared in the file, in the
+    order written, by line and then by column. `kind` is `method`,
+    `constructor`, `property` or `field`. `name` is `Parse(string)` for a
+    method, `.ctor(int)` for a constructor, and its own name for a field or a
+    property, `this[]` for an indexer. A property is one member, an
+    auto-property and a property with a body alike, with the lines of its whole
+    declaration. A primary constructor's captured parameter is a `field`, and a
+    positional record's parameter a `property`. An initializer is its
+    field's. `public` is true for a member declared public. The lines are those
+    of the member's declaration as written. No two members' lines overlap, but
+    where the code shares them: fields declared in one declaration, such as
+    `int a, b;`, share its lines, and a primary constructor's parameters lie in
+    its lines. `lens` is the member's name in a lens, `Type.Method` with `:N`
+    where the name matches several overloads, as `navarone lens method` takes
+    it, or null for a member no lens can name, such as a constructor or a
+    property. `piece` is the number, from 1, of the piece that holds the
+    member, in the order of the check's question, or null for a member in no
+    piece: a constructor, a field no method of a piece uses, and a method that
+    uses no instance field, calls no other method of the class and is called
+    by none. A property with a body is in the piece all its accessors with a
+    body share, and in none when they fall in different pieces.
+  - `accessors` is empty but for a property with a body, where it holds one
+    `{"name", "public", "firstLine", "lastLine", "piece"}` per accessor with a
+    body, the getter first. `name` is `get`, `set` or `init`, `public` is
+    true for an accessor declared public, the lines are the accessor's own,
+    those of the expression for an expression body, and `piece` is its own
+    piece.
   A partial type shows only in the file of its first declaration, with the
   members declared there.
 - `navarone duplicates [--similarity <share>] [--tokens <count>]`: prints

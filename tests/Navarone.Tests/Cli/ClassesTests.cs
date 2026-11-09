@@ -46,6 +46,22 @@ public sealed class ClassesTests : IDisposable
         }
         """;
 
+    private const string Split = """
+        public class Gauge
+        {
+            private int read;
+            private int written;
+
+            public int Level
+            {
+                get { return read; }
+                private set { written = value; }
+            }
+        }
+
+        public record Point(int Y, int X);
+        """;
+
     private readonly TempRepo repo = new();
     private readonly TempEvents events = new();
     private readonly FakeProvider provider = new();
@@ -95,9 +111,36 @@ public sealed class ClassesTests : IDisposable
                 ("Total(int)", "method", true, 20, 20, "Till.Total", 1),
                 ("Label()", "method", true, 22, 22, "Till.Label", 2),
                 ("Name()", "method", false, 24, 24, "Till.Name", 2),
-                ("Rate.get", "property", true, 26, 28, null, 1),
+                ("Rate", "property", true, 26, 29, null, 1),
             ],
             members);
+        Assert.All(till["members"]!.AsArray().SkipLast(1), member => Assert.Empty(member!["accessors"]!.AsArray()));
+        var rate = Assert.Single(till["members"]!.AsArray()[^1]!["accessors"]!.AsArray())!;
+        Assert.Equal(("get", true, 28, 28, 1), ((string?)rate["name"], (bool)rate["public"]!, (int)rate["firstLine"]!, (int)rate["lastLine"]!, (int?)rate["piece"]));
+    }
+
+    [Fact]
+    public async Task APropertyWhoseAccessorsFallInTwoPiecesIsInNoneAndEachAccessorNamesItsOwn()
+    {
+        await CommitAsync(Split);
+
+        await RunAsync("classes", "Till.cs", "--json");
+
+        var level = TypeNamed("Gauge")["members"]!.AsArray().Single(member => (string?)member!["name"] == "Level")!;
+        Assert.Equal(("property", true, 6, 10, null), ((string?)level["kind"], (bool)level["public"]!, (int)level["firstLine"]!, (int)level["lastLine"]!, (int?)level["piece"]));
+        var accessors = level["accessors"]!.AsArray().Select(accessor => ((string?)accessor!["name"], (bool)accessor["public"]!, (int)accessor["firstLine"]!, (int)accessor["lastLine"]!, (int?)accessor["piece"]));
+        Assert.Equal([("get", true, 8, 8, 1), ("set", false, 9, 9, 2)], accessors);
+    }
+
+    [Fact]
+    public async Task MembersOnOneLineComeInTheOrderWritten()
+    {
+        await CommitAsync(Split);
+
+        await RunAsync("classes", "Till.cs", "--json");
+
+        var members = TypeNamed("Point")["members"]!.AsArray().Select(member => ((string?)member!["name"], (string?)member["kind"]));
+        Assert.Equal([(".ctor(int, int)", "constructor"), ("Y", "property"), ("X", "property")], members);
     }
 
     [Fact]
@@ -107,12 +150,12 @@ public sealed class ClassesTests : IDisposable
 
         await RunAsync("classes", "Till.cs", "--json");
 
-        var lcom4 = TypeNamed("Till")["lcom4"]!;
-        Assert.Equal((2, 1, true), ((int)lcom4["value"]!, (int)lcom4["limit"]!, (bool)lcom4["above"]!));
-        var drawer = TypeNamed("Drawer")["lcom4"]!;
-        Assert.Equal((0, 1, false), ((int)drawer["value"]!, (int)drawer["limit"]!, (bool)drawer["above"]!));
+        var till = TypeNamed("Till")["pieces"]!;
+        Assert.Equal(("lcom4", 2, 1, true), ((string?)till["check"], (int)till["value"]!, (int)till["limit"]!, (bool)till["above"]!));
+        var drawer = TypeNamed("Drawer")["pieces"]!;
+        Assert.Equal(("lcom4", 0, 1, false), ((string?)drawer["check"], (int)drawer["value"]!, (int)drawer["limit"]!, (bool)drawer["above"]!));
         var priced = TypeNamed("IPriced");
-        Assert.Null(priced["lcom4"]);
+        Assert.Null(priced["pieces"]);
         var price = Assert.Single(priced["members"]!.AsArray())!;
         Assert.Equal(("Price(int)", "IPriced.Price", null), ((string?)price["name"], (string?)price["lens"], (int?)price["piece"]));
     }
@@ -178,16 +221,18 @@ public sealed class ClassesTests : IDisposable
     private JsonNode TypeNamed(string name) =>
         JsonNode.Parse(output.ToString())!["types"]!.AsArray().Single(type => (string?)type!["name"] == name)!;
 
-    private async Task TillAsync(string directory = "")
+    private Task TillAsync(string directory = "") => CommitAsync(Till, directory);
+
+    private async Task CommitAsync(string code, string directory = "")
     {
         repo.Git("init", "-q", "-b", "master");
         Directory.CreateDirectory(Path.Combine(repo.Root, directory));
         var solution = Path.Combine(repo.Root, directory, "a.sln");
         await File.WriteAllTextAsync(solution, "", TestContext.Current.CancellationToken);
-        await File.WriteAllTextAsync(Path.Combine(repo.Root, directory, "Till.cs"), Till, TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(repo.Root, directory, "Till.cs"), code, TestContext.Current.CancellationToken);
         repo.Git("add", ".");
         repo.Commit();
-        provider.Codebases[solution] = await CSharpSnippet.FactsAsync(("Till.cs", Till));
+        provider.Codebases[solution] = await CSharpSnippet.FactsAsync(("Till.cs", code));
     }
 
     private EngineSetup Wire(string repoRoot, NavaroneEventHandler log) => events.Isolate(Wiring.For(repoRoot, log)) with { Provider = provider };

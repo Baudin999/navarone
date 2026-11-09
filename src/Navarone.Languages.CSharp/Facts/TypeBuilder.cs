@@ -42,6 +42,9 @@ internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? contai
     /// <summary>The methods gathered so far.</summary>
     public List<MethodFacts> Methods { get; } = [];
 
+    /// <summary>The properties and indexers with a body gathered so far.</summary>
+    public List<PropertyFacts> Properties { get; } = [];
+
     /// <summary>The methods declared without a body. One stands in only while no declaration of it with a body was read.</summary>
     public List<MethodFacts> Bodiless { get; } = [];
 
@@ -76,7 +79,8 @@ internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? contai
         List<MethodFacts> measured = [.. methods.Select(method => WithItsMember(method, read))];
         var code = string.Join('\n', ordered.Select(declaration => declaration.Code));
         List<string> ids = [.. ordered.SelectMany(declaration => declaration.Ids)];
-        return new TypeFacts(symbol, name, containingType, space, assembly, location, fields, measured, isInterface, isTest, code, written, ids);
+        List<PropertyFacts> properties = [.. Properties.DistinctBy(property => property.Symbol)];
+        return new TypeFacts(symbol, name, containingType, space, assembly, location, fields, properties, measured, isInterface, isTest, code, written, ids);
     }
 
     // An initializer carries its member's symbol. It writes that member, so it uses it as a field when another method

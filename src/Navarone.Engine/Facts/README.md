@@ -10,7 +10,9 @@ Each method's `CallSites` are its calls in the order written, each with the symb
 
 Each type carries its own short `Name`, and each method and field its `Signature`, its declaration as the language writes it, without a body. Each field also carries where its name is and its declaration as written, so the lens can show it.
 
-Each method carries a short `Name`, whether it is static, whether it is public and whether it is a property's or indexer's accessor, each field a `Name`, whether it is static, whether it is public and whether it is an auto-property, and each type the type it is nested in, its namespace, its assembly, whether it is an interface and whether it is a test class. A question and the class view name members with these, so neither parses a `SymbolId`.
+Each type also carries its properties and indexers with a body, each with its whole declaration and its accessors with a body by the symbol of their method, so the class view shows a property as one member. An auto-property is a field.
+
+Each method carries a short `Name`, whether it is static, whether it is declared public and whether it is a property's or indexer's accessor, each field a `Name`, whether it is static, whether it is declared public and whether it is an auto-property, and each type the type it is nested in, its namespace, its assembly, whether it is an interface and whether it is a test class. A question and the class view name members with these, so neither parses a `SymbolId`.
 
 Each method and type also carries its `Code`: the declaration as written, name included. The engine computes the fingerprint a resolution carries from it, so a change to the code, a rename included, opens the problem again. See `Reasons/`.
 
