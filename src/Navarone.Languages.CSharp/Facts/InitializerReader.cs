@@ -78,6 +78,7 @@ internal static class InitializerReader
         var body = BodyFacts.Of([value], model);
         var location = SourcePlaces.LocationOf(member, declaration, path);
         var isPrivate = member.DeclaredAccessibility == Accessibility.Private;
+        var isPublic = member.DeclaredAccessibility == Accessibility.Public;
         var code = NavaroneComments.CodeWithout(declaration);
         var written = SourcePlaces.WrittenOf(declaration, declaration);
         var ids = NavaroneComments.IdsAt(declaration);
@@ -89,6 +90,7 @@ internal static class InitializerReader
             member.IsStatic,
             IsAccessor: false,
             isPrivate,
+            isPublic,
             Contracts: [],
             Parameters: [],
             body.ControlFlow,

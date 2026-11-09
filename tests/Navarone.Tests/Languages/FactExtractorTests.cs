@@ -64,6 +64,47 @@ public sealed class FactExtractorTests
     }
 
     [Fact]
+    public async Task AMethodOrFieldAnyCodeMayUseIsPublicAndAnAutoPropertyIsAProperty()
+    {
+        var facts = await CSharpSnippet.FactsAsync("""
+            class C
+            {
+                private int hidden;
+                public int shown;
+                public int Auto { get; set; }
+                internal int Inner { get; }
+                void Unmarked() { }
+                internal void Inside() { }
+                public void Open() { }
+                public int Total => hidden;
+            }
+            """);
+
+        var type = facts.Types.Single(type => type.Symbol.Value == "Snippet::C");
+        Assert.Equal(["Open()", "Total.get"], type.Methods.Where(method => method.IsPublic).Select(method => method.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(["Auto", "shown"], type.Fields.Where(field => field.IsPublic).Select(field => field.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(["Auto", "Inner"], type.Fields.Where(field => field.IsProperty).Select(field => field.Name).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task ATypeNamesItsNamespaceInFullAndItsAssembly()
+    {
+        var facts = await CSharpSnippet.FactsAsync("""
+            namespace Shop.Orders
+            {
+                class Till { }
+            }
+
+            class Loose { }
+            """);
+
+        var till = facts.Types.Single(type => type.Name == "Till");
+        Assert.Equal("Shop.Orders", till.Namespace);
+        Assert.Equal("Snippet", till.Assembly);
+        Assert.Equal(string.Empty, facts.Types.Single(type => type.Name == "Loose").Namespace);
+    }
+
+    [Fact]
     public async Task AMethodsContractsAreTheTypesThatDeclareWhatItOverridesOrImplements()
     {
         var facts = await CSharpSnippet.FactsAsync("""

@@ -239,7 +239,7 @@ public sealed class CyclomaticMetricTests
     {
         var atLimit = Method("AtLimit", 3);
         var aboveLimit = Method("AboveLimit", 4);
-        var facts = new CodebaseFacts([new TypeFacts(new SymbolId("T"), "T", null, Here, [], [atLimit, aboveLimit], false, false, "", new Written(1, ""), [])], Complete: true);
+        var facts = new CodebaseFacts([new TypeFacts(new SymbolId("T"), "T", null, string.Empty, "Fake", Here, [], [atLimit, aboveLimit], false, false, "", new Written(1, ""), [])], Complete: true);
         var limits = new CheckLimits(new Dictionary<string, int>(StringComparer.Ordinal) { ["cyclomatic"] = 4 });
 
         var finding = Assert.Single(new CyclomaticMetric().Measure(facts, limits));
@@ -253,7 +253,7 @@ public sealed class CyclomaticMetricTests
     [Fact]
     public void TakesTheDefaultLimitOfTenWhenNoneIsSet()
     {
-        var facts = new CodebaseFacts([new TypeFacts(new SymbolId("T"), "T", null, Here, [], [Method("Ten", 9), Method("Eleven", 10)], false, false, "", new Written(1, ""), [])], Complete: true);
+        var facts = new CodebaseFacts([new TypeFacts(new SymbolId("T"), "T", null, string.Empty, "Fake", Here, [], [Method("Ten", 9), Method("Eleven", 10)], false, false, "", new Written(1, ""), [])], Complete: true);
 
         var finding = Assert.Single(new CyclomaticMetric().Measure(facts, new CheckLimits(new Dictionary<string, int>())));
 
@@ -268,6 +268,7 @@ public sealed class CyclomaticMetricTests
         new SymbolId(symbol),
         symbol,
         Here,
+        false,
         false,
         false,
         false,

@@ -30,6 +30,12 @@ internal sealed class ResearchCommands(Repo repo)
         return new InRepo("map", Costed: false, current => new ResearchCommands(current).MapAsync());
     }
 
+    /// <summary>`navarone classes &lt;path&gt; --json`: the class view of a source file for brain's window. It logs no cost.</summary>
+    public static InRepo Classes(string path)
+    {
+        return new InRepo("classes", Costed: false, current => new ResearchCommands(current).ClassesAsync(path));
+    }
+
     /// <summary>`navarone evidence &lt;id&gt; --json`: the problem's evidence document.</summary>
     public static InRepo Evidence(ProblemId id)
     {
@@ -98,6 +104,27 @@ internal sealed class ResearchCommands(Repo repo)
         var commit = LensVersion.Commit(root);
         var changed = LensVersion.Changed(root);
         await repo.Output.WriteLineAsync(map.Json(commit, changed).ToJsonString()).ConfigureAwait(false);
+        return ExitCodes.Printed;
+    }
+
+    // `navarone classes <path> --json`: the class view of the source file at the path, relative to the repo, as one JSON
+    // document: the commit and every type in the file with its members and their pieces. It writes nothing, not even an
+    // id. A path to no file under the repo is a usage error.
+    private async Task<int> ClassesAsync(string path)
+    {
+        var root = Path.GetFullPath(repo.Setup.RepoRoot);
+        var file = Path.GetFullPath(Path.Combine(root, path));
+        var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
+        var outside = relative.StartsWith("../", StringComparison.Ordinal);
+        if (outside || !File.Exists(file))
+        {
+            await repo.Error.WriteLineAsync($"navarone: no file {path} in the repo").ConfigureAwait(false);
+            return ExitCodes.UsageError;
+        }
+
+        var view = await ClassView.ReadAsync(repo.Setup, repo.Code, relative, CancellationToken.None).ConfigureAwait(false);
+        var commit = LensVersion.Commit(root);
+        await repo.Output.WriteLineAsync(view.Json(commit).ToJsonString()).ConfigureAwait(false);
         return ExitCodes.Printed;
     }
 

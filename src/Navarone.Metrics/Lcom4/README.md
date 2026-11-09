@@ -4,7 +4,7 @@ Subject: class. Default limit: 1. A finding is raised only above the limit.
 
 Lack of cohesion, LCOM4, as Hitz and Montazeri restated it as a graph; the name comes from Briand, Daly and Wüst 1998. Every method is a node. Two methods are joined when they use the same field or when one calls the other. The score is the number of pieces the graph falls into. More than one piece means more than one job in one class.
 
-Reads `TypeFacts.IsTest`, `TypeFacts.Fields` (and `IsStatic` on each) and `TypeFacts.Methods`, and each method's `FieldUses` and `Calls`. The question lists each piece with its methods and fields, so the agent sees what belongs together.
+Reads `TypeFacts.IsTest`, `TypeFacts.Fields` (and `IsStatic` on each) and `TypeFacts.Methods`, and each method's `FieldUses` and `Calls`. The question lists each piece with its methods and fields, so the agent sees what belongs together. `Pieces` hands the same pieces, by symbol, to the class view of `navarone classes <path> --json`, which colours each member by its piece.
 
 Conventions:
 

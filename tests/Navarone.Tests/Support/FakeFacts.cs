@@ -29,13 +29,14 @@ internal static class FakeFacts
         var here = new SourceLocation("T.cs", 1, 1);
         return new CodebaseFacts(
         [
-            new TypeFacts(new SymbolId(type), type, null, here, [], [
+            new TypeFacts(new SymbolId(type), type, null, string.Empty, "Fake", here, [], [
                 .. methods.Select((method, at) => new MethodFacts(
                     new SymbolId(method.Symbol),
                     method.Symbol,
                     new SourceLocation("T.cs", LineOf(at), 1),
                     false,
                     true,
+                    false,
                     false,
                     false,
                     [],

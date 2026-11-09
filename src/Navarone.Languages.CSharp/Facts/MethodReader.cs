@@ -214,6 +214,7 @@ internal static class MethodReader
         var isConstructor = method.MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor;
         var isAccessor = method.MethodKind is MethodKind.PropertyGet or MethodKind.PropertySet;
         var isPrivate = method.DeclaredAccessibility == Accessibility.Private;
+        var isPublic = method.DeclaredAccessibility == Accessibility.Public;
         var contracts = ContractsOf(method);
         var steering = ParameterSteering.Of(bodies, method.Parameters, model);
         var parameters = new List<ParameterFacts>();
@@ -233,6 +234,7 @@ internal static class MethodReader
             method.IsStatic,
             isAccessor,
             isPrivate,
+            isPublic,
             contracts,
             parameters,
             body.ControlFlow,

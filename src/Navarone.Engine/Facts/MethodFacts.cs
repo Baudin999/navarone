@@ -9,6 +9,7 @@ namespace Navarone.Engine.Facts;
 /// IsAccessor is true for a property's or indexer's getter or setter: the provider decides, so a classifier never sees
 /// the language.
 /// IsPrivate is true for a method only its own type may call, so all its callers are in the type: the provider decides.
+/// IsPublic is true for a method any code may call, part of its type's API: the provider decides.
 /// Contracts are the types that declare the members the method overrides or implements, an interface's or a base
 /// type's: a method that fulfils a contract is called through it, so a caller the provider resolves is not all its
 /// callers.
@@ -36,6 +37,7 @@ public sealed record MethodFacts(
     bool IsStatic,
     bool IsAccessor,
     bool IsPrivate,
+    bool IsPublic,
     IReadOnlyList<SymbolId> Contracts,
     IReadOnlyList<ParameterFacts> Parameters,
     IReadOnlyList<ControlFlowFact> ControlFlow,

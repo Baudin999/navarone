@@ -42,6 +42,38 @@ public sealed class Lcom4MetricTests
     }
 
     [Fact]
+    public async Task ThePiecesOfAClassAreThoseItsQuestionNamesBySymbol()
+    {
+        var facts = await CSharpSnippet.FactsAsync("""
+            class C
+            {
+                int a, b;
+                void Fill() { a++; }
+                int ReadA() => a;
+                void Drain(int n) { b = n; }
+                void Quiet() { }
+            }
+            """);
+
+        var pieces = new Lcom4Metric().Pieces(facts.Types.Single(type => type.Name == "C"));
+
+        Assert.NotNull(pieces);
+        Assert.Equal(
+            [("Snippet::C.Fill() Snippet::C.ReadA()", "Snippet::C.a"), ("Snippet::C.Drain(int)", "Snippet::C.b")],
+            pieces.Select(piece => (string.Join(' ', piece.Methods.Select(method => method.Value)), string.Join(' ', piece.Fields.Select(field => field.Value)))));
+    }
+
+    [Fact]
+    public async Task AnInterfaceHasNoPieces()
+    {
+        var facts = await CSharpSnippet.FactsAsync("""
+            interface I { int M() => 1; }
+            """);
+
+        Assert.Null(new Lcom4Metric().Pieces(Assert.Single(facts.Types)));
+    }
+
+    [Fact]
     public async Task ACallJoinsTwoPieces()
     {
         Assert.Equal(1, await ValueAsync("""

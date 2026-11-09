@@ -10,7 +10,7 @@ Each method's `CallSites` are its calls in the order written, each with the symb
 
 Each type carries its own short `Name`, and each method and field its `Signature`, its declaration as the language writes it, without a body. Each field also carries where its name is and its declaration as written, so the lens can show it.
 
-Each method carries a short `Name`, whether it is static and whether it is a property's or indexer's accessor, each field a `Name` and whether it is static, and each type the type it is nested in, whether it is an interface and whether it is a test class. A question names members with these, so a metric never parses a `SymbolId`.
+Each method carries a short `Name`, whether it is static, whether it is public and whether it is a property's or indexer's accessor, each field a `Name`, whether it is static, whether it is public and whether it is an auto-property, and each type the type it is nested in, its namespace, its assembly, whether it is an interface and whether it is a test class. A question and the class view name members with these, so neither parses a `SymbolId`.
 
 Each method and type also carries its `Code`: the declaration as written, name included. The engine computes the fingerprint a resolution carries from it, so a change to the code, a rename included, opens the problem again. See `Reasons/`.
 

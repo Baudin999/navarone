@@ -10,12 +10,12 @@ namespace Navarone.Languages.CSharp.Facts;
 /// A declaration's code leaves out the `// navarone: &lt;id&gt;` comments written in it.
 /// A synthesized type, such as the Program of top-level statements, has methods but no declaration.
 /// </summary>
-internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? containingType, IReadOnlyList<FieldFacts> fields, bool isInterface, bool isTest)
+internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? containingType, string space, string assembly, IReadOnlyList<FieldFacts> fields, bool isInterface, bool isTest)
 {
     private readonly List<(SourceLocation Location, string Code, Written Written, IReadOnlyList<string> Ids)> declarations = [];
 
     /// <summary>
-    /// A builder for the given type, with its fields and whether it is a test class. A field declared in a file the
+    /// A builder for the given type, with its fields, its namespace, its assembly and whether it is a test class. A field declared in a file the
     /// given ignores match is left out.
     /// </summary>
     // navarone: 0000084
@@ -27,10 +27,16 @@ internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? contai
             outer = Symbols.Id(containing);
         }
 
+        var space = string.Empty;
+        if (!type.ContainingNamespace.IsGlobalNamespace)
+        {
+            space = type.ContainingNamespace.ToDisplayString();
+        }
+
         var fields = FieldsOf(type, directory, ignores);
         var isInterface = type.TypeKind == TypeKind.Interface;
         var isTest = TestClass.Is(type);
-        return new TypeBuilder(Symbols.Id(type), type.Name, outer, fields, isInterface, isTest);
+        return new TypeBuilder(Symbols.Id(type), type.Name, outer, space, type.ContainingAssembly.Name, fields, isInterface, isTest);
     }
 
     /// <summary>The methods gathered so far.</summary>
@@ -70,7 +76,7 @@ internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? contai
         List<MethodFacts> measured = [.. methods.Select(method => WithItsMember(method, read))];
         var code = string.Join('\n', ordered.Select(declaration => declaration.Code));
         List<string> ids = [.. ordered.SelectMany(declaration => declaration.Ids)];
-        return new TypeFacts(symbol, name, containingType, location, fields, measured, isInterface, isTest, code, written, ids);
+        return new TypeFacts(symbol, name, containingType, space, assembly, location, fields, measured, isInterface, isTest, code, written, ids);
     }
 
     // An initializer carries its member's symbol. It writes that member, so it uses it as a field when another method
@@ -152,6 +158,8 @@ internal sealed class TypeBuilder(SymbolId symbol, string name, SymbolId? contai
             Symbols.Id(symbol),
             symbol.Name,
             symbol.IsStatic,
+            symbol.DeclaredAccessibility == Accessibility.Public,
+            symbol is IPropertySymbol,
             Symbols.Signature(symbol),
             SourcePlaces.LocationOf(symbol, declaration, path),
             SourcePlaces.WrittenOf(declaration, declaration));

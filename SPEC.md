@@ -337,7 +337,8 @@ One command. Agents may run it themselves.
   `lens`, `evidence`, `duplicates`, a reason, `keep`, `replace`,
   `large` and `settled`. A command that ends in a usage error writes
   none. The commands for brain write no `cost`: `events --json`,
-  `code <hash>`, `disputes --json`, `lens --json` and `map --json`. They write
+  `code <hash>`, `disputes --json`, `lens --json`, `map --json` and
+  `classes <path> --json`. They write
   nothing.
 - `navarone events --json`: every event in the log as one JSON document,
   `{"source":"navarone","events":[...]}`, each event as its line holds it,
@@ -396,6 +397,47 @@ One command. Agents may run it themselves.
     is `red`, or `clash` when a clash holds the problem red, as "Clashes" says,
     and then `question` is what `navarone` prints for it. A problem no run has
     shown yet has a null `id`: Navarone grants ids only to a `navarone` run.
+- `navarone classes <path> --json`: prints the class view of one source file
+  as one JSON document for brain's window: every type declared in it, each
+  member and the piece of its class the member belongs to, so the window shows
+  the class's API and how a method fits in it. `path` is relative to the repo.
+  It writes nothing, as `map --json` does, and reads through the facts cache. A
+  path to no file, or to a file outside the repo, is a usage error: exit 2. A
+  file that declares no type has none. The document is `{"commit", "path",
+  "types"}`:
+  - `commit` is the full hash of HEAD, or null outside git or with no commit
+    yet, as in `map --json`, and `path` the file's path as the repo names it.
+  - `types` holds one `{"assembly", "namespace", "name", "containingType",
+    "firstLine", "lastLine", "lcom4", "members"}` per type whose first
+    declaration is in the file, a nested type included, in line order.
+    `assembly` is the name of the assembly that compiles it, `namespace` its
+    namespace in full, empty for the global namespace, and `name` its own short
+    name. `containingType` is the short name of the type it is nested in, or
+    null for a top-level type. The lines are those of its declaration as
+    written. `lcom4` is `{"value", "limit", "above"}`: the number of pieces the
+    lcom4 check counts, its limit, and whether the value is above the limit,
+    whatever answers the problem. It is null for a type lcom4 does not measure:
+    an interface and a test class.
+  - `members` holds one `{"name", "kind", "public", "firstLine", "lastLine",
+    "lens", "piece"}` per member declared in the file, in line order. `name`
+    is the name a question shows: `Parse(string)` for a method, `.ctor(int)`
+    for a constructor, `Total.get` for a property's accessor, and a field's or
+    auto-property's own name. `kind` is `method`, `constructor`, `property` or
+    `field`: an auto-property is one `property`, a property with a body is one
+    `property` per accessor, and the lines of an accessor start at its
+    property's signature. A primary constructor's captured parameter is a
+    `field`. An initializer is its field's. `public` is true for a member any
+    code may use. The lines are those of the member's declaration as written.
+    `lens` is the member's name in a lens, `Type.Method` with `:N` where the
+    name matches several overloads, as `navarone lens method` takes it, or
+    null for a member no lens can name, such as a constructor or an accessor.
+    `piece` is the number, from 1, of the lcom4 piece that holds the member,
+    in the order of the check's question, or null for a member in no piece:
+    a constructor, a field no method of a piece uses, and a method that uses
+    no instance field, calls no other method of the class and is called by
+    none.
+  A partial type shows only in the file of its first declaration, with the
+  members declared there.
 - `navarone duplicates [--similarity <share>] [--tokens <count>]`: prints
   every clone pair at or above the floor, similarity 0.7 and 30 tokens by
   default, with both pieces of code. It is research toward a duplication
@@ -411,7 +453,7 @@ anywhere is a usage error: exit 2.
 ## The facts cache
 Every command that reads the code, `navarone`, `--full-coverage`, a
 reason, `keep`, `replace`, `large`, `settled`, `evidence`, `lens`,
-`lens --json`, `map --json` and `duplicates`, loads every solution and builds its facts.
+`lens --json`, `map --json`, `classes --json` and `duplicates`, loads every solution and builds its facts.
 Building them is the slow part, so Navarone keeps the merged facts of a
 version of the code in `.navarone/` at the root of the repo it runs in, in
 a git worktree the worktree's own root, and the next command at the same

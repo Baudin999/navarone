@@ -114,24 +114,7 @@ public sealed class CodeMap
         };
     }
 
-    // A fact's path is relative to its codebase's directory. The repo-relative path is the one of the codebases'
-    // directories under which the file exists; with none, such as a file of a subject that is gone, the path as it is.
-    private string RepoPath(string path)
-    {
-        var root = Path.GetFullPath(repoRoot);
-        foreach (var codebase in codebases)
-        {
-            // A codebase is a file under the repo root, so its path has a directory.
-            var directory = Path.GetDirectoryName(Path.GetFullPath(codebase))!;
-            var file = Path.GetFullPath(Path.Combine(directory, path));
-            if (File.Exists(file))
-            {
-                return Path.GetRelativePath(root, file).Replace('\\', '/');
-            }
-        }
-
-        return path;
-    }
+    private string RepoPath(string path) => RepoPaths.Of(repoRoot, codebases, path);
 
     private sealed record MappedMethod(string Path, string Name, int First, int Last, string Type);
 }

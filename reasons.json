@@ -1,5 +1,5 @@
 {
-  "granted": 87,
+  "granted": 89,
   "problems": [
     {
       "id": "0000001",
@@ -453,12 +453,12 @@
       "id": "0000068",
       "check": "cyclomatic",
       "symbol": "navarone::Navarone.Cli.Grammar.Parse(string[])",
-      "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
-      "value": 42,
+      "fingerprint": "75cad1b9bc652664b92349ed81c165be7d9c38440c4d6020ea6f429f42fba6e5",
+      "value": 46,
       "resolution": {
-        "reason": "Parse is the grammar of navarone and nothing else: each arm is one form of the usage text, written as its words in a list pattern, and returns the command value that form names. The paths are those words, each constant a list element tests, not logic. The cost, the repo wiring and the handlers moved out to Command, the runner in Commands and the command classes, as Kelk decided. Cutting the arms further, by first word, would scatter one grammar over several methods and split-complexity would count them back. The map --json arm is one more form.",
-        "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
-        "value": 42
+        "reason": "Parse is the grammar of navarone and only that: every arm is one form of the usage text, its words written as a list pattern, returning the command that form names. The paths are those words, constants a list element tests, not logic. Wiring, costs and handlers already live in Command, Commands and the command classes, as Kelk decided. Splitting the arms by first word would scatter one grammar over several methods, and split-complexity would count them back. The classes --json arm is one more form.",
+        "fingerprint": "75cad1b9bc652664b92349ed81c165be7d9c38440c4d6020ea6f429f42fba6e5",
+        "value": 46
       }
     },
     {
@@ -477,12 +477,12 @@
       "id": "0000070",
       "check": "cognitive",
       "symbol": "navarone::Navarone.Cli.Grammar.Parse(string[])",
-      "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
-      "value": 30,
+      "fingerprint": "75cad1b9bc652664b92349ed81c165be7d9c38440c4d6020ea6f429f42fba6e5",
+      "value": 33,
       "resolution": {
-        "reason": "Parse is hard to read only in the count: it is one flat switch, one arm per form of the usage text, each arm the form\u0027s words in a list pattern and the command value it names. Nothing nests and no arm does a second thing; the cost, the repo wiring and the handlers live in Command, Commands and the command classes. The id-shape guards are the boundary check Kelk kept in the parser. The map --json arm is one more form.",
-        "fingerprint": "c1b350f2784f4bf1cc131577101079dbc6ff08464e720b5837e5d0f9fafc894d",
-        "value": 30
+        "reason": "Parse reads hard only in the count: one flat switch with an arm per form of the usage text, each arm the form\u0027s words as a list pattern and the command it names. Nothing nests and no arm does a second thing; wiring, costs and handlers live in Command, Commands and the command classes. The id-shape guards are the boundary check Kelk kept in the parser. The classes --json arm is one more form like map --json.",
+        "fingerprint": "75cad1b9bc652664b92349ed81c165be7d9c38440c4d6020ea6f429f42fba6e5",
+        "value": 33
       }
     },
     {
@@ -601,11 +601,11 @@
       "id": "0000083",
       "check": "split-complexity",
       "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.MethodReader.Of(IMethodSymbol, SyntaxNode, IReadOnlyList\u003CSyntaxNode\u003E, string, Written, SemanticModel, string)",
-      "fingerprint": "5ed5d083ee230af2dd8d8c6c9dc4a78587bea6ccf3991094603fd7c341ff6dc6",
+      "fingerprint": "a3e02c9ded0a24c9ed8bf15e3e55c90d3e03e1beca6cf14537f0b5bc15971c5c",
       "value": 11,
       "resolution": {
-        "reason": "MethodReader.Of maps one method onto its facts in named steps, and each helper answers one fact. ContractsOf walks the overridden chain and adds each interface whose members\u0027 implementations include the method, IdsOf adds an accessor\u0027s property ids to the declaration\u0027s own, and NameOf names a property accessor as get or set and any other method with its parameter types. Inlined, three loops and two branches would sit in the preparation of one constructor call; each is its own rule over the symbol.",
-        "fingerprint": "5ed5d083ee230af2dd8d8c6c9dc4a78587bea6ccf3991094603fd7c341ff6dc6",
+        "reason": "MethodReader.Of maps one Roslyn method onto its facts in named steps, and each helper answers one fact of it. ContractsOf walks the overridden chain and adds each interface whose implementations include the method, IdsOf puts an accessor\u0027s property ids before the declaration\u0027s own, and NameOf names an accessor get or set and any other method by its parameter types. The new public flag is one named step with no branch. Inlined, three loops and two branches would crowd the preparation of a single constructor call.",
+        "fingerprint": "a3e02c9ded0a24c9ed8bf15e3e55c90d3e03e1beca6cf14537f0b5bc15971c5c",
         "value": 11
       }
     },
@@ -613,12 +613,12 @@
       "id": "0000084",
       "check": "split-complexity",
       "symbol": "Navarone.Languages.CSharp::Navarone.Languages.CSharp.Facts.TypeBuilder.Of(INamedTypeSymbol, string, Ignores)",
-      "fingerprint": "dec44f7db25d65dc00564baa633ccdca2ec32985318fc1f28261546d8c76cd8f",
-      "value": 14,
+      "fingerprint": "91eb1128252ca0b0f266f5ebf637cc56bdc533a9f7cc094dbab8f8aba2515c45",
+      "value": 15,
       "resolution": {
-        "reason": "TypeBuilder.Of starts a builder from the type\u0027s name, outer type, kind, test rule and fields, each a named step. FieldsOf gathers the symbols that stand as fields, every non-constant field or its auto-property and each captured primary constructor parameter, and FieldOf turns one into facts, skipping a symbol with no declaration or one declared in an ignored file. Inlined, the symbol walk and the per-field guards would bury the builder\u0027s start under the field rule, which is a job of its own.",
-        "fingerprint": "dec44f7db25d65dc00564baa633ccdca2ec32985318fc1f28261546d8c76cd8f",
-        "value": 14
+        "reason": "TypeBuilder.Of starts a builder from the type\u0027s name, outer type, namespace, assembly, kind, test rule and fields, each a named step; the one new branch keeps the global namespace empty. FieldsOf gathers the symbols that stand as fields, each non-constant field or its auto-property and each captured primary constructor parameter, and FieldOf turns one into facts, skipping a symbol without a declaration or declared in an ignored file. Inlined, the symbol walk and per-field guards would bury the builder\u0027s start under the field rule, a job of its own.",
+        "fingerprint": "91eb1128252ca0b0f266f5ebf637cc56bdc533a9f7cc094dbab8f8aba2515c45",
+        "value": 15
       }
     },
     {
@@ -637,11 +637,11 @@
       "id": "0000086",
       "check": "cyclomatic",
       "symbol": "Navarone.Metrics::Navarone.Metrics.Lcom4.Lcom4Metric.PiecesOf(TypeFacts)",
-      "fingerprint": "e68801f00dbaf68efd5e67c69f006b23de91702c0c19ec031336d4e2d4eb0abb",
+      "fingerprint": "6f527af13ea235564780ec2a3441e9d89b1baa55b06db44c30bf9890d859eae0",
       "value": 13,
       "resolution": {
-        "reason": "PiecesOf is Hitz and Montazeri\u0027s union-find in one place, told in named steps: it picks the methods that say something, each that uses an instance field, calls another method of the class or is called by one, then joins two methods for each call and each shared field, finds every method\u0027s root and groups the methods by root into pieces with their fields. The thirteen paths are the loops of those steps and the local Find and Join; scattering them into helpers would cut one algorithm into pieces that only it uses.",
-        "fingerprint": "e68801f00dbaf68efd5e67c69f006b23de91702c0c19ec031336d4e2d4eb0abb",
+        "reason": "PiecesOf is Hitz and Montazeri\u0027s union-find in one place, told in named steps: it keeps the methods that say something, each using an instance field, calling another method of the class or called by one, then joins two methods per call and per shared field, finds each root and groups the methods by root into pieces with their fields. The thirteen paths are the loops of those steps and the local Find and Join. Pieces and Question now read its pieces as records; scattering the algorithm into helpers would cut it into parts only it uses.",
+        "fingerprint": "6f527af13ea235564780ec2a3441e9d89b1baa55b06db44c30bf9890d859eae0",
         "value": 13
       }
     },
@@ -655,6 +655,18 @@
         "reason": "A JsonConverter is the pair of inverse functions of one format: Read turns the entries back into facts and Write turns facts into entries, and the two share the shape of ControlFlowEntry and the rule that a whole is written as its place in the list, not as a field. Splitting them into a reader class and a writer class would part the two halves of one format, which must change together, so one converter is the right unit.",
         "fingerprint": "d1a1cd153235b1065376897768a982a4a3303040c11079ac91d7878424bc8841",
         "value": 2
+      }
+    },
+    {
+      "id": "0000089",
+      "check": "split-complexity",
+      "symbol": "Navarone.Engine::Navarone.Engine.ClassView.ReadAsync(EngineSetup, Code, string, CancellationToken)",
+      "fingerprint": "41d4540798c58deb0b0a9dcdf9858ab513a5ce751fa32d3f0ee39e882071b003",
+      "value": 16,
+      "resolution": {
+        "reason": "ReadAsync builds the class view in named steps, and each helper answers one rule of it. Of keeps the types whose first declaration is in the file and gives each its outer type and its lcom4 against the limit, MembersOf lists the fields and methods declared in that file and leaves out an initializer its field stands for, KindOf names a method constructor, property or method, and PieceNumbers numbers each piece\u0027s symbols from one. Inlined, the type walk, the member walk and the piece numbering would be three loops in one method doing three jobs.",
+        "fingerprint": "41d4540798c58deb0b0a9dcdf9858ab513a5ce751fa32d3f0ee39e882071b003",
+        "value": 16
       }
     }
   ]

@@ -7,7 +7,7 @@ using Navarone.Engine.Metrics;
 namespace Navarone.Metrics.Lcom4;
 
 /// <summary>Hitz and Montazeri: the pieces the method graph of a class falls into.</summary>
-public sealed class Lcom4Metric : ISignal
+public sealed class Lcom4Metric : IClassPieces
 {
     /// <inheritdoc />
     public string Id => "lcom4";
@@ -20,17 +20,37 @@ public sealed class Lcom4Metric : ISignal
     {
         var limit = limits.For(Id);
         var findings = new List<Finding>();
-        foreach (var type in facts.Types.Where(type => !type.IsInterface && !type.IsTest))
+        foreach (var type in facts.Types.Where(Measures))
         {
             var pieces = PiecesOf(type);
             if (pieces.Count > limit)
             {
-                findings.Add(new Finding(Id, type.Symbol, Subject, type.Location, pieces.Count, limit, Question(pieces, limit)));
+                findings.Add(new Finding(Id, type.Symbol, Subject, type.Location, pieces.Count, limit, Question(type, pieces, limit)));
             }
         }
 
         return findings;
     }
+
+    /// <inheritdoc />
+    public IReadOnlyList<ClassPiece>? Pieces(TypeFacts type)
+    {
+        if (!Measures(type))
+        {
+            return null;
+        }
+
+        var pieces = new List<ClassPiece>();
+        foreach (var piece in PiecesOf(type))
+        {
+            pieces.Add(new ClassPiece([.. piece.Methods.Select(method => method.Symbol)], piece.Fields));
+        }
+
+        return pieces;
+    }
+
+    // An interface has no state of its own, and a test class is no design to judge.
+    private static bool Measures(TypeFacts type) => !type.IsInterface && !type.IsTest;
 
     // Union-find over the measured methods. Two methods join when they use the same instance field or one calls the
     // other. A static method that calls a constructor of its class, a factory, uses the fields that constructor and the
@@ -38,9 +58,9 @@ public sealed class Lcom4Metric : ISignal
     // called by none says nothing and is left out. Each piece lists its methods, then the fields its methods use, in
     // declaration order.
     // navarone: 0000086
-    private static List<(List<string> Methods, List<string> Fields)> PiecesOf(TypeFacts type)
+    private static List<Piece> PiecesOf(TypeFacts type)
     {
-        var names = type.Fields.Where(field => !field.IsStatic).ToDictionary(field => field.Symbol, field => field.Name);
+        var instance = type.Fields.Where(field => !field.IsStatic).Select(field => field.Symbol).ToHashSet();
         var constructors = type.Methods.Where(method => method.IsConstructor).DistinctBy(method => method.Symbol).ToDictionary(method => method.Symbol);
         var uses = type.Methods.Where(method => !method.IsConstructor).DistinctBy(method => method.Symbol).ToDictionary(method => method.Symbol, method => UsesOf(method, constructors));
         var own = uses.Keys.ToHashSet();
@@ -54,7 +74,7 @@ public sealed class Lcom4Metric : ISignal
         var methods = new List<MethodFacts>();
         foreach (var method in measured)
         {
-            var usesAField = uses[method.Symbol].Any(names.ContainsKey);
+            var usesAField = uses[method.Symbol].Any(instance.Contains);
             var callsAnother = OwnCallees(method, own).Any();
             var isCalled = called.Contains(method.Symbol);
             if (usesAField || callsAnother || isCalled)
@@ -78,7 +98,7 @@ public sealed class Lcom4Metric : ISignal
                 Join(i, owner[callee]);
             }
 
-            foreach (var field in uses[methods[i].Symbol].Where(names.ContainsKey))
+            foreach (var field in uses[methods[i].Symbol].Where(instance.Contains))
             {
                 Join(i, fieldOwner.GetValueOrDefault(field, i));
                 fieldOwner.TryAdd(field, i);
@@ -91,12 +111,12 @@ public sealed class Lcom4Metric : ISignal
             roots[i] = Find(i);
         }
 
-        var pieces = new List<(List<string> Methods, List<string> Fields)>();
+        var pieces = new List<Piece>();
         foreach (var group in Enumerable.Range(0, methods.Count).GroupBy(i => roots[i]))
         {
-            var members = group.Select(i => methods[i].Name).ToList();
-            var fields = group.SelectMany(i => uses[methods[i].Symbol]).Where(names.ContainsKey).Distinct().Select(field => names[field]).ToList();
-            pieces.Add((members, fields));
+            var members = group.Select(i => methods[i]).ToList();
+            var fields = group.SelectMany(i => uses[methods[i].Symbol]).Where(instance.Contains).Distinct().ToList();
+            pieces.Add(new Piece(members, fields));
         }
 
         return pieces;
@@ -156,12 +176,13 @@ public sealed class Lcom4Metric : ISignal
         return uses;
     }
 
-    private static string Question(List<(List<string> Methods, List<string> Fields)> pieces, int limit)
+    private static string Question(TypeFacts type, List<Piece> pieces, int limit)
     {
+        var names = type.Fields.Where(field => !field.IsStatic).ToDictionary(field => field.Symbol, field => field.Name);
         var described = new List<string>();
         for (var index = 0; index < pieces.Count; index++)
         {
-            described.Add(Describe(pieces[index], index));
+            described.Add(Describe(pieces[index], index, names));
         }
 
         var jobs = string.Join("; ", described);
@@ -170,15 +191,18 @@ public sealed class Lcom4Metric : ISignal
             $"lcom4 {pieces.Count} is above the limit of {limit}: this class does {pieces.Count} separate jobs. {jobs}. Why are they one class?");
     }
 
-    private static string Describe((List<string> Methods, List<string> Fields) piece, int index)
+    private static string Describe(Piece piece, int index, Dictionary<SymbolId, string> names)
     {
-        var methods = string.Join(", ", piece.Methods);
+        var methods = string.Join(", ", piece.Methods.Select(method => method.Name));
         if (piece.Fields.Count == 0)
         {
             return $"piece {index + 1} holds {methods} and uses no field";
         }
 
-        var fields = string.Join(", ", piece.Fields);
+        var fields = string.Join(", ", piece.Fields.Select(field => names[field]));
         return $"piece {index + 1} holds {methods} over {fields}";
     }
+
+    // A piece as the check builds it: its methods, then the instance fields they use, in declaration order.
+    private sealed record Piece(List<MethodFacts> Methods, List<SymbolId> Fields);
 }
