@@ -54,6 +54,21 @@ public sealed class ClashTests : IDisposable
     }
 
     [Fact]
+    public async Task TheMapShowsAClashHeldProblemAsAClashWithItsMethodAndLogsNothing()
+    {
+        await ClashOnAReasonAsync();
+        var logged = events.Handler.Read().Count;
+        output.GetStringBuilder().Clear();
+
+        Assert.Equal(ExitCodes.Printed, await RunAsync("map", "--json"));
+
+        var problem = Assert.Single(JsonNode.Parse(output.ToString())!["problems"]!.AsArray())!;
+        Assert.Equal(("0000001", "T.First", "clash", "cyclomatic"), ((string?)problem["id"], (string?)problem["method"], (string?)problem["state"], (string?)problem["check"]));
+        Assert.StartsWith("the builder and the validator clash", (string?)problem["question"], StringComparison.Ordinal);
+        Assert.Equal(logged, events.Handler.Read().Count);
+    }
+
+    [Fact]
     public async Task AClashHoldsTheProblemRedOutsideTheChangeToo()
     {
         Directory.Delete(Path.Combine(repo.Root, ".git"));

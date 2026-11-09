@@ -24,6 +24,12 @@ internal sealed class ResearchCommands(Repo repo)
         return new InRepo("lens", Costed: true, current => new ResearchCommands(current).LensAsync(text));
     }
 
+    /// <summary>`navarone map --json`: the map of the code for brain's window. It logs no cost.</summary>
+    public static InRepo Map()
+    {
+        return new InRepo("map", Costed: false, current => new ResearchCommands(current).MapAsync());
+    }
+
     /// <summary>`navarone evidence &lt;id&gt; --json`: the problem's evidence document.</summary>
     public static InRepo Evidence(ProblemId id)
     {
@@ -80,6 +86,18 @@ internal sealed class ResearchCommands(Repo repo)
         var page = await lens.PageAsync(repo.Code, CancellationToken.None).ConfigureAwait(false);
         var commit = LensVersion.Commit(Path.GetFullPath(repo.Setup.RepoRoot));
         await repo.Output.WriteLineAsync(page.Json(commit).ToJsonString()).ConfigureAwait(false);
+        return ExitCodes.Printed;
+    }
+
+    // `navarone map --json`: the map of the code as one JSON document: the version, every file with its methods and every
+    // red problem. It writes nothing, not even an id.
+    private async Task<int> MapAsync()
+    {
+        var map = await Analysis.MapAsync(repo.Setup, repo.Codebases, CancellationToken.None).ConfigureAwait(false);
+        var root = Path.GetFullPath(repo.Setup.RepoRoot);
+        var commit = LensVersion.Commit(root);
+        var changed = LensVersion.Changed(root);
+        await repo.Output.WriteLineAsync(map.Json(commit, changed).ToJsonString()).ConfigureAwait(false);
         return ExitCodes.Printed;
     }
 

@@ -337,7 +337,8 @@ One command. Agents may run it themselves.
   `lens`, `evidence`, `duplicates`, a reason, `keep`, `replace`,
   `large` and `settled`. A command that ends in a usage error writes
   none. The commands for brain write no `cost`: `events --json`,
-  `code <hash>`, `disputes --json` and `lens --json`. They write nothing.
+  `code <hash>`, `disputes --json`, `lens --json` and `map --json`. They write
+  nothing.
 - `navarone events --json`: every event in the log as one JSON document,
   `{"source":"navarone","events":[...]}`, each event as its line holds it,
   for brain to read. It writes nothing and works from any directory. A torn
@@ -370,6 +371,31 @@ One command. Agents may run it themselves.
   lens as one JSON document for brain's window, as "One page, two outputs"
   under "The lens" says, and otherwise works as `navarone lens`, but it
   writes no `cost`.
+- `navarone map --json`: prints the map of the code as one JSON document for
+  brain's window, in the repo it runs in. It writes nothing: it grants no id,
+  stores no code and logs no event, not even a `cost`, so brain may run it as
+  often as it needs. It reads through the facts cache, as the lens does, and a
+  repo with no navarone.json or outside git behaves as the lens does there. The
+  document is `{"commit", "changed", "files", "problems"}`:
+  - `commit` and `changed` name the version of the code, as "The lens" does:
+    the full hash of HEAD, or null outside git or with no commit yet, and the
+    paths of the files that differ from it, none when the working tree is the
+    commit. `changed` is empty outside git.
+  - `files` holds one `{"path", "methods"}` per source file with a method,
+    ordered by path. `path` is relative to the repo. `methods` holds
+    `{"name", "firstLine", "lastLine", "type"}` in line order: `name` is the
+    method's name in a lens, `Type.Method` with `:N` where the name matches
+    several overloads, as `navarone lens method` takes it. The lines are those
+    of the method's code as written, comments included, and `type` is its
+    declaring type. A method no lens can name, such as an accessor, is not in
+    the map.
+  - `problems` holds every red problem `navarone --full-coverage` prints, in id
+    order, as `{"id", "path", "firstLine", "lastLine", "method", "check",
+    "state", "question"}`. The lines are those of the subject's code. `method`
+    is the subject's name in a lens, or null for a class or a module. `state`
+    is `red`, or `clash` when a clash holds the problem red, as "Clashes" says,
+    and then `question` is what `navarone` prints for it. A problem no run has
+    shown yet has a null `id`: Navarone grants ids only to a `navarone` run.
 - `navarone duplicates [--similarity <share>] [--tokens <count>]`: prints
   every clone pair at or above the floor, similarity 0.7 and 30 tokens by
   default, with both pieces of code. It is research toward a duplication
@@ -385,7 +411,7 @@ anywhere is a usage error: exit 2.
 ## The facts cache
 Every command that reads the code, `navarone`, `--full-coverage`, a
 reason, `keep`, `replace`, `large`, `settled`, `evidence`, `lens`,
-`lens --json` and `duplicates`, loads every solution and builds its facts.
+`lens --json`, `map --json` and `duplicates`, loads every solution and builds its facts.
 Building them is the slow part, so Navarone keeps the merged facts of a
 version of the code in `.navarone/` at the root of the repo it runs in, in
 a git worktree the worktree's own root, and the next command at the same

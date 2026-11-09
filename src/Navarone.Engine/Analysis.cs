@@ -54,7 +54,7 @@ public static class Analysis
         var kept = WorktreeClashes.Kept(judged);
         var found = CheckedRepo.Of(setup, facts, subjects, kept);
         found.Save();
-        var holds = clashes.Holds(setup.Events);
+        var holds = clashes.Holds();
         var held = holds.Select(hold => hold.Id).ToHashSet(StringComparer.Ordinal);
         var shown = found.Problems.Where(problem => problem.ShownBy(coverage)).ToList();
         var free = shown.Where(problem => !held.Contains(problem.Verdict.Problem.Id.Value)).ToList();
@@ -73,10 +73,72 @@ public static class Analysis
 
         foreach (var hold in holds)
         {
-            entries.Add(new ShownProblem(hold.Id, hold.Check, hold.Symbol, FindingState.Red, hold.Code));
+            string? stored = null;
+            if (hold.Text is not null)
+            {
+                stored = setup.Events.Store(hold.Text);
+            }
+
+            entries.Add(new ShownProblem(hold.Id, hold.Check, hold.Symbol, FindingState.Red, stored));
         }
 
         return new CheckRun(verdicts, place, happened, entries, holds);
+    }
+
+    /// <summary>
+    /// The map of the code at the given paths, for `navarone map --json`: every method a lens can name and every red
+    /// problem `navarone --full-coverage` shows, the problems a clash holds included. It writes nothing: it grants no
+    /// id, so a problem no run has shown yet has a null id, it stores no code and it logs no event.
+    /// </summary>
+    public static async Task<CodeMap> MapAsync(EngineSetup setup, IReadOnlyList<string> paths, CancellationToken cancellationToken)
+    {
+        var code = new Code(setup.Provider, setup.RepoRoot, paths);
+        var facts = await code.FactsAsync(cancellationToken).ConfigureAwait(false);
+        var subjects = Subject.AllIn(facts);
+        var place = EventPlace.Of(setup.RepoRoot);
+        var history = WorktreeHistory.Of(setup.Events.Read(), place.Worktree);
+        var written = subjects.ToDictionary(pair => pair.Key, pair => pair.Value.Written);
+        var clashes = new WorktreeClashes(history, written);
+        var kept = WorktreeClashes.Kept(clashes.Collect(setup.Answers));
+        var found = CheckedRepo.Of(setup, facts, subjects, kept);
+        var holds = clashes.Holds();
+        var held = holds.Select(hold => hold.Id).ToHashSet(StringComparer.Ordinal);
+        var ungranted = found.Granted.Select(raised => raised.Id).ToHashSet(StringComparer.Ordinal);
+
+        var seen = new List<SeenProblem>();
+        foreach (var problem in found.Problems)
+        {
+            var verdict = problem.Verdict;
+            var id = verdict.Problem.Id.Value;
+            if (verdict.State != FindingState.Red || held.Contains(id))
+            {
+                continue;
+            }
+
+            string? granted = id;
+            if (ungranted.Contains(id))
+            {
+                granted = null;
+            }
+
+            var finding = verdict.Finding;
+            var at = subjects[finding.Subject].Places[0];
+            seen.Add(new SeenProblem(granted, finding.Check, finding.Subject, at.Path, at.Line, at.EndLine, false, finding.Question));
+        }
+
+        foreach (var hold in holds)
+        {
+            var symbol = new SymbolId(hold.Symbol);
+            var last = hold.Line;
+            if (subjects.TryGetValue(symbol, out var subject))
+            {
+                last = subject.Places[0].EndLine;
+            }
+
+            seen.Add(new SeenProblem(hold.Id, hold.Check, symbol, hold.Path, hold.Line, last, true, hold.Says));
+        }
+
+        return CodeMap.Of(facts, code, seen);
     }
 
     /// <summary>Writes what the given run made happen, then the run itself, with its cost in tokens, to the event log.</summary>

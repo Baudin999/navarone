@@ -59,12 +59,12 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
     /// finding of a replace is the validator's, with the user's words after it. The code of each held subject is
     /// stored, so a later fix can show it.
     /// </summary>
-    public List<Hold> Holds(NavaroneEventHandler events)
+    public List<Hold> Holds()
     {
         var holds = new List<Hold>();
         foreach (var clash in history.Clashes())
         {
-            holds.Add(HoldOf(events, clash, $"the builder and the validator clash, red until the user judges it in brain's window: {clash.Refusal.WhatIsWrong}"));
+            holds.Add(HoldOf(clash, $"the builder and the validator clash, red until the user judges it in brain's window: {clash.Refusal.WhatIsWrong}"));
         }
 
         foreach (var (clash, answer) in history.Replaced())
@@ -85,7 +85,7 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
                 finding = $"{finding} The user adds: {words}";
             }
 
-            holds.Add(HoldOf(events, clash, $"the user sided with the validator in brain's window, so the code must change: {finding}"));
+            holds.Add(HoldOf(clash, $"the user sided with the validator in brain's window, so the code must change: {finding}"));
         }
 
         return holds;
@@ -93,7 +93,7 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
 
     // The hold of a problem in a clash, where its subject is now, or where the builder defended it when the subject is
     // gone.
-    private Hold HoldOf(NavaroneEventHandler events, Clash clash, string says)
+    private Hold HoldOf(Clash clash, string says)
     {
         var refusal = clash.Refusal;
         if (!subjects.TryGetValue(new SymbolId(refusal.Symbol), out var subject))
@@ -101,7 +101,7 @@ internal sealed class WorktreeClashes(WorktreeHistory history, IReadOnlyDictiona
             return new Hold(refusal.Id, refusal.Check, refusal.Symbol, clash.Defended.Path, clash.Defended.Line, says, null);
         }
 
-        return new Hold(refusal.Id, refusal.Check, refusal.Symbol, subject.Path, subject.Line, says, events.Store(subject.Text));
+        return new Hold(refusal.Id, refusal.Check, refusal.Symbol, subject.Path, subject.Line, says, subject.Text);
     }
 
     // The hash of the code of the subject with the given symbol now, or null when it is gone.

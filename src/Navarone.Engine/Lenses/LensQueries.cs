@@ -106,9 +106,11 @@ internal sealed class LensQueries
         return new LensQuery(name, query);
     }
 
-    // Type.Method, with the overload's number when the name matches several, or null when a part holds a character the
-    // lexer does not read as part of a word, or a dot, which splits Type.Method.
-    private string? NameOf(MethodFacts method)
+    /// <summary>
+    /// Type.Method, with the overload's number after a colon when the name matches several, or null when a part holds
+    /// a character the lexer does not read as part of a word, or a dot, which splits Type.Method.
+    /// </summary>
+    public string? NameOf(MethodFacts method)
     {
         var type = owners[method.Symbol].Name;
         var paren = method.Name.IndexOf('(', StringComparison.Ordinal);

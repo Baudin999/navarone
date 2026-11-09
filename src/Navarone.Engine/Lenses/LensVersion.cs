@@ -13,6 +13,21 @@ public static class LensVersion
     public static string? Commit(string repoRoot) => new Git(repoRoot).Head();
 
     /// <summary>
+    /// The paths, relative to the repo, of every file that differs from HEAD, none outside a git repository or with no
+    /// commit yet. A git status that fails or times out throws an InvalidDataException.
+    /// </summary>
+    public static IReadOnlyList<string> Changed(string repoRoot)
+    {
+        var git = new Git(repoRoot);
+        if (git.Head() is null)
+        {
+            return [];
+        }
+
+        return git.Changed();
+    }
+
+    /// <summary>
     /// The version of the code in the repo at the given root as markdown, ending in a blank line. A git status that fails
     /// or times out throws an InvalidDataException.
     /// </summary>

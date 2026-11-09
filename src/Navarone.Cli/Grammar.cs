@@ -20,6 +20,7 @@ internal static class Grammar
             ["code", var hash] => BrainCommands.Code(hash),
             ["lens", "--json", .. var words] => ResearchCommands.LensJson(words),
             ["lens", .. var words] => ResearchCommands.LensMarkdown(words),
+            ["map", "--json"] => ResearchCommands.Map(),
             ["evidence", var id, "--json"] when ProblemId.IsShape(id) => ResearchCommands.Evidence(new ProblemId(id)),
             ["duplicates", .. var options] => ResearchCommands.Duplicates(options),
             [var word, .. var rest] when ProblemId.IsShape(word) => IdForm(new ProblemId(word), rest),
@@ -79,6 +80,7 @@ internal static class Grammar
         await error.WriteLineAsync("       navarone disputes --json").ConfigureAwait(false);
         await error.WriteLineAsync("       navarone evidence <id> --json").ConfigureAwait(false);
         await error.WriteLineAsync("       navarone duplicates [--similarity <share>] [--tokens <count>]").ConfigureAwait(false);
+        await error.WriteLineAsync("       navarone map --json").ConfigureAwait(false);
         await error.WriteLineAsync("       navarone lens [--json] method <Type.Method> <view>...").ConfigureAwait(false);
         return ExitCodes.UsageError;
     }
